@@ -1,0 +1,30 @@
+---
+local_cert_dir: /etc/cfssl
+
+download_dir: /opt/tmp
+
+k8s_interface: tap0
+k8s_conf_dir: /var/lib/kubernetes
+k8s_bin_dir: /usr/local/bin
+k8s_release: 1.5.1
+k8s_cni_dir: /opt/cni
+k8s_cni_plugins: cni-07a8a28637e97b22eb8dfe710eeae1344f69d16e
+k8s_worker_binaries:
+  - kube-proxy
+  - kubelet
+k8s_certificates:
+  - ca.pem
+  - kubernetes-key.pem
+  - kubernetes.pem
+
+k8s_kubelet_conf_dir: /var/lib/kubelet
+k8s_kubelet_token: chAng3m3
+
+docker_version: 1.13.1
+docker_user: docker
+docker_group: docker
+docker_uid: 666
+docker_gid: 666
+docker_bin_dir: /usr/local/bin
+docker_storage_driver: overlay
+docker_log_level: error
