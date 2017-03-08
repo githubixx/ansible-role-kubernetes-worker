@@ -1,5 +1,5 @@
-{% macro cluster_hosts() %}
-{%- for host in groups['controller'] -%}
+{% macro k8s_controller_hosts() %}
+{%- for host in groups['k8s-controller'] -%}
 https://{{hostvars[host]['ansible_' + k8s_interface].ipv4.address}}:6443{% if not loop.last %},{% endif %}
 {%- endfor -%}
 {% endmacro %}
@@ -12,8 +12,9 @@ Requires=docker.service
 
 [Service]
 ExecStart={{k8s_bin_dir}}/kubelet \
+  --node-ip={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
   --allow-privileged=true \
-  --api-servers={{cluster_hosts()}} \
+  --api-servers={{k8s_controller_hosts()}} \
   --cloud-provider= \
   --cluster-dns=10.32.0.10 \
   --cluster-domain=cluster.local \
@@ -23,8 +24,8 @@ ExecStart={{k8s_bin_dir}}/kubelet \
   --kubeconfig={{k8s_kubelet_conf_dir}}/kubeconfig \
   --reconcile-cidr=true \
   --serialize-image-pulls=false \
-  --tls-cert-file={{k8s_conf_dir}}/kubernetes.pem \
-  --tls-private-key-file={{k8s_conf_dir}}/kubernetes-key.pem \
+  --tls-cert-file={{k8s_conf_dir}}/cert-k8s-apiserver.pem \
+  --tls-private-key-file={{k8s_conf_dir}}/cert-k8s-apiserver-key.pem \
   --v=2
 
 Restart=on-failure
