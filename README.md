@@ -1,8 +1,6 @@
 ansible-role-kubernetes-worker
 ==============================
 
-This playbook is work in progress! It should work but some parts may need refactoring!
-
 For more information have a look at: [Kubernetes the not so hard way with Ansible (at Scaleway) - Part 7 - Worker](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-7/). This playbook installs Kubernetes worker including Docker, kubelet and kube-proxy.
 
 Requirements
@@ -54,8 +52,7 @@ Example Playbook
 ----------------
 
 ```
-- hosts: kubernetes-worker
-
+- hosts: k8s-worker
   roles:
     - githubixx.kubernetes-worker
 ```
