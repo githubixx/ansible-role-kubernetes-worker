@@ -7,6 +7,7 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
 [Service]
 ExecStart={{k8s_bin_dir}}/kube-proxy \
+  --bind-address={{['ansible_' + k8s_interface].ipv4.address}} \
   --master=https://{{k8s_api_server_ip}}:6443 \
   --kubeconfig={{k8s_kubelet_conf_dir}}/kubeconfig \
   --proxy-mode=iptables \
