@@ -12,15 +12,20 @@ Requires=docker.service
 
 [Service]
 ExecStart={{k8s_bin_dir}}/kubelet \
+  --address={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
   --node-ip={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
+  --cadvisor-port=0 \
+  --register-node=true \
   --allow-privileged=true \
   --api-servers={{k8s_controller_hosts()}} \
   --cloud-provider= \
-  --cluster-dns=10.32.0.10 \
-  --cluster-domain=cluster.local \
+  --cluster-dns={{k8s_cluster_dns}} \
+  --cluster-domain={{k8s_cluster_domain}} \
   --container-runtime=docker \
   --docker=unix:///var/run/docker.sock \
-  --network-plugin=kubenet \
+  --network-plugin={{k8s_network_plugin}} \
+  --cni-conf-dir={{k8s_cni_conf_dir}} \
+  --cni-bin-dir={{k8s_cni_bin_dir}} \
   --kubeconfig={{k8s_kubelet_conf_dir}}/kubeconfig \
   --reconcile-cidr=true \
   --serialize-image-pulls=false \
