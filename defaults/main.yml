@@ -21,7 +21,7 @@ k8s_certificates:
 k8s_kubelet_conf_dir: /var/lib/kubelet
 k8s_kubelet_token: chAng3m3
 
-k8s_cluster_dns: 10.32.0.10
+k8s_cluster_dns: 10.32.0.254
 k8s_cluster_domain: cluster.local
 
 k8s_network_plugin: cni
