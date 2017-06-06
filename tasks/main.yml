@@ -41,18 +41,6 @@
   tags:
     - k8s-worker
 
-- name: Copy certificates
-  copy:
-    src: "{{local_cert_dir}}/{{item}}"
-    dest: "{{k8s_conf_dir}}/{{item}}"
-    mode: 0640
-    owner: root
-    group: root
-  with_items:
-    - "{{k8s_certificates}}"
-  tags:
-    - k8s-worker
-
 - name: Create download directory (used to store archives)
   file:
     path: "{{k8s_download_dir}}"
