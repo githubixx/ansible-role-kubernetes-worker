@@ -1,5 +1,5 @@
 {% macro k8s_controller_hosts() %}
-{%- for host in groups['k8s-controller'] -%}
+{%- for host in groups['k8s_controller'] -%}
 https://{{hostvars[host]['ansible_' + k8s_interface].ipv4.address}}:6443{% if not loop.last %},{% endif %}
 {%- endfor -%}
 {% endmacro %}

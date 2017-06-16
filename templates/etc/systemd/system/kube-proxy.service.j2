@@ -1,4 +1,4 @@
-{% set k8s_api_server = groups['k8s-controller']|first %}
+{% set k8s_api_server = groups['k8s_controller']|first %}
 {% set k8s_api_server_ip = hostvars[k8s_api_server]['ansible_' + k8s_interface].ipv4.address %}
 
 [Unit]
@@ -8,7 +8,7 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 [Service]
 ExecStart={{k8s_bin_dir}}/kube-proxy \
   --bind-address={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
-  --master=https://{{k8s_api_server_ip}}:6443 \
+  --master=http://{{k8s_api_server_ip}}:8080 \
   --kubeconfig={{k8s_kubelet_conf_dir}}/kubeconfig \
   --proxy-mode=iptables \
   --v=2

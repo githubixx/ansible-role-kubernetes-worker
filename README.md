@@ -43,7 +43,7 @@ Example Playbook
 ----------------
 
 ```
-- hosts: k8s-worker
+- hosts: k8s_worker
   roles:
     - githubixx.kubernetes-worker
 ```
