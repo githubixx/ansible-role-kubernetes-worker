@@ -61,15 +61,15 @@
 
 - name: Download CNI plugins
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/network-plugins/{{k8s_cni_plugins}}.tar.gz
-    dest: "{{k8s_download_dir}}/{{k8s_cni_plugins}}.tar.gz"
+    url: https://github.com/containernetworking/plugins/releases/download/v{{k8s_cni_plugin_version}}/cni-plugins-amd64-v{{k8s_cni_plugin_version}}.tgz
+    dest: "{{k8s_download_dir}}/{{k8s_cni_plugin_version}}.tgz"
     mode: 0640
   tags:
     - k8s-worker
 
 - name: Unzip CNI plugins
   unarchive:
-    src: "{{k8s_download_dir}}/{{k8s_cni_plugins}}.tar.gz"
+    src: "{{k8s_download_dir}}/{{k8s_cni_plugin_version}}.tgz"
     dest: "{{k8s_cni_dir}}"
     remote_src: yes
     creates: "{{k8s_cni_dir}}/bin/cnitool"
