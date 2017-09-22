@@ -20,7 +20,6 @@ k8s_certificates:
   - cert-k8s-apiserver-key.pem
 
 k8s_kubelet_conf_dir: /var/lib/kubelet
-k8s_kubelet_token: chAng3m3
 
 k8s_cluster_dns: 10.32.0.254
 k8s_cluster_domain: cluster.local
