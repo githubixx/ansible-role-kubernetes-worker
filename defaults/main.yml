@@ -6,7 +6,7 @@ k8s_download_dir: /opt/tmp
 k8s_interface: tap0
 k8s_conf_dir: /var/lib/kubernetes
 k8s_bin_dir: /usr/local/bin
-k8s_release: 1.5.1
+k8s_release: 1.7.6
 
 k8s_worker_binaries:
   - kube-proxy
