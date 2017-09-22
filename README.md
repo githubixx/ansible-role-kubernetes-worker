@@ -12,26 +12,26 @@ Role Variables
 --------------
 
 ```
-local_cert_dir: /etc/cfssl
+k8s_ca_conf_directory: /etc/k8s/certs
 
-k8s_download_dir: /opt/docker
+k8s_download_dir: /opt/tmp
 
 k8s_interface: tap0
 k8s_conf_dir: /var/lib/kubernetes
 k8s_bin_dir: /usr/local/bin
-k8s_release: 1.5.1
+k8s_release: 1.7.6
 k8s_cni_dir: /opt/cni
-k8s_cni_plugins: cni-07a8a28637e97b22eb8dfe710eeae1344f69d16e
+k8s_cni_plugin_version: 0.6.0
 k8s_worker_binaries:
   - kube-proxy
   - kubelet
+  - kubectl
 k8s_certificates:
   - ca.pem
   - kubernetes-key.pem
   - kubernetes.pem
 
 k8s_kubelet_conf_dir: /var/lib/kubelet
-k8s_kubelet_token: chAng3m3
 ```
 
 Dependencies
