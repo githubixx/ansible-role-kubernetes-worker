@@ -12,25 +12,27 @@ Requires=docker.service
 
 [Service]
 ExecStart={{k8s_bin_dir}}/kubelet \
-  --address={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
-  --node-ip={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
-  --cadvisor-port=0 \
-  --register-node=true \
-  --allow-privileged=true \
-  --api-servers={{k8s_controller_hosts()}} \
-  --cloud-provider= \
+  --allow-privileged={{k8s_worker_kublet_allow_privileged}} \
   --cluster-dns={{k8s_cluster_dns}} \
   --cluster-domain={{k8s_cluster_domain}} \
-  --container-runtime=docker \
-  --docker=unix:///var/run/docker.sock \
+  --container-runtime={{k8s_worker_kubelet_container_runtime}} \
+  --docker={{k8s_worker_kubelet_docker}} \
+  --enable-custom-metrics \
+  --image-pull-progress-deadline={{k8s_worker_kubelet_image_pull_progress_deadline}} \
+  --kubeconfig={{k8s_kubelet_conf_dir}}/kubeconfig \
   --network-plugin={{k8s_network_plugin}} \
+  --register-node={{k8s_worker_kubelet_register_node}} \
+  --runtime-request-timeout={{k8s_worker_kubelet_runtime_request_timeout}} \
+  --tls-cert-file={{k8s_ca_conf_directory}}/cert-k8s-apiserver.pem \
+  --tls-private-key-file={{k8s_ca_conf_directory}}/cert-k8s-apiserver-key.pem \
+  --require-kubeconfig \
+  --address={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
+  --node-ip={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
+  --cadvisor-port={{k8s_worker_kubelet_cadvisor_port}} \
+  --cloud-provider={{k8s_worker_kubelet_cloud_provider}} \
   --cni-conf-dir={{k8s_cni_conf_dir}} \
   --cni-bin-dir={{k8s_cni_bin_dir}} \
-  --kubeconfig={{k8s_kubelet_conf_dir}}/kubeconfig \
-  --reconcile-cidr=true \
-  --serialize-image-pulls=false \
-  --tls-cert-file={{k8s_conf_dir}}/cert-k8s-apiserver.pem \
-  --tls-private-key-file={{k8s_conf_dir}}/cert-k8s-apiserver-key.pem \
+  --serialize-image-pulls={{k8s_worker_kubelet_serialize_image_pulls}} \
   --v=2
 
 Restart=on-failure
