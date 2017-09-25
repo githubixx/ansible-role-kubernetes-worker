@@ -12,11 +12,13 @@ k8s_worker_binaries:
   - kubelet
   - kubectl
 
-k8s_certificates:
+k8s_worker_certificates:
   - ca-k8s-apiserver.pem
   - ca-k8s-apiserver-key.pem
   - cert-k8s-apiserver.pem
   - cert-k8s-apiserver-key.pem
+  - cert-kube-proxy.pem
+  - cert-kube-proxy-key.pem
 
 k8s_worker_download_dir: "/opt/tmp"
 
@@ -27,6 +29,12 @@ k8s_worker_kubelet_container_runtime: "docker"
 k8s_worker_kubelet_docker: "unix:///var/run/docker.sock"
 k8s_worker_kubelet_image_pull_progress_deadline: "2m"
 k8s_worker_kubelet_register_node: "true"
+k8s_worker_kubelet_runtime_request_timeout: "10m"
+k8s_worker_kubelet_cadvisor_port: "4194"
+k8s_worker_kubelet_cloud_provider: ""
+
+k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
+k8s_worker_kubeproxy_proxy_mode: "iptables"
 
 k8s_cluster_dns: "10.32.0.254"
 k8s_cluster_domain: "cluster.local"

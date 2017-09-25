@@ -9,19 +9,7 @@
   tags:
     - k8s-worker
 
-- name: Copy certificates
-  copy:
-    src: "{{k8s_ca_conf_directory}}/{{item}}"
-    dest: "{{k8s_conf_dir}}/{{item}}"
-    mode: 0640
-    owner: root
-    group: root
-  with_items:
-    - "{{k8s_certificates}}"
-  tags:
-    - k8s-worker
-
-- name: Ensure Kubernetes config directory
+ - name: Ensure Kubernetes config directory
   file:
     path: "{{k8s_conf_dir}}"
     state: directory
@@ -33,7 +21,17 @@
 
 - name: Ensure Kubelet config directory
   file:
-    path: "{{k8s_kubelet_conf_dir}}"
+    path: "{{k8s_worker_kubelet_conf_dir}}"
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+  tags:
+    - k8s-worker
+
+- name: Ensure Kubeproxy config directory
+  file:
+    path: "{{k8s_worker_kubeproxy_conf_dir}}"
     state: directory
     mode: 0700
     owner: root
@@ -46,6 +44,38 @@
     path: "{{k8s_download_dir}}"
     state: directory
     mode: 0750
+  tags:
+    - k8s-worker
+
+- name: Copy worker certificates (part 1)
+  copy:
+    src: "{{k8s_ca_conf_directory}}/{{item}}"
+    dest: "{{k8s_conf_dir}}/{{item}}"
+    mode: 0640
+    owner: root
+    group: root
+  with_items:
+    - "{{k8s_worker_certificates}}"
+  tags:
+    - k8s-worker
+
+- name: Copy worker certificates (part 2)
+  copy:
+    src: "{{k8s_ca_conf_directory}}/cert-{{hostvars[inventory_hostname]}}.pem"
+    dest: "{{k8s_conf_dir}}/cert-{{hostvars[inventory_hostname]}}.pem"
+    mode: 0640
+    owner: root
+    group: root
+  tags:
+    - k8s-worker
+
+- name: Copy worker certificates (part 3)
+  copy:
+    src: "{{k8s_ca_conf_directory}}/cert-{{hostvars[inventory_hostname]}}-key.pem"
+    dest: "{{k8s_conf_dir}}/cert-{{hostvars[inventory_hostname]}}-key.pem"
+    mode: 0640
+    owner: root
+    group: root
   tags:
     - k8s-worker
 
@@ -86,10 +116,20 @@
   tags:
     - k8s-worker
 
-- name: Create kubeconfig
+- name: Create Kubelet kubeconfig
   template:
-    src: var/lib/kubelet/kubeconfig.j2
+    src: "{{k8s_config_directory}}/{{hostvars[inventory_hostname]}}.kubeconfig"
     dest: "{{k8s_kubelet_conf_dir}}/kubeconfig"
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - k8s-worker
+
+- name: Create Kubeproxy kubeconfig
+  template:
+    src: "{{k8s_config_directory}}/kube-proxy.kubeconfig"
+    dest: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
     owner: root
     group: root
     mode: 0644
@@ -115,6 +155,16 @@
     name: kubelet
     enabled: yes
     state: started
+  tags:
+    - k8s-worker
+
+- name: Ensure Kubeproxy config directory
+  file:
+    path: "{{k8s_worker_kubeproxy_conf_dir}}"
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
   tags:
     - k8s-worker
 
