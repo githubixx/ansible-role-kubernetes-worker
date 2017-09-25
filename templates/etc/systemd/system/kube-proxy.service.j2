@@ -8,9 +8,9 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 [Service]
 ExecStart={{k8s_bin_dir}}/kube-proxy \
   --bind-address={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
-  --master=http://{{k8s_api_server_ip}}:8080 \
-  --kubeconfig={{k8s_kubelet_conf_dir}}/kubeconfig \
-  --proxy-mode=iptables \
+  --cluster-cidr={{k8s_controller_manager_cluster_cidr}}
+  --kubeconfig={{k8s_worker_kubeproxy_conf_dir}}/kubeconfig \
+  --proxy-mode={{k8s_worker_kubeproxy_proxy_mode}} \
   --v=2
 
 Restart=on-failure
