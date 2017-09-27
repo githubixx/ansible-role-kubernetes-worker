@@ -119,7 +119,7 @@
 - name: Create Kubelet kubeconfig
   template:
     src: "{{k8s_config_directory}}/{{hostvars[inventory_hostname]}}.kubeconfig"
-    dest: "{{k8s_kubelet_conf_dir}}/kubeconfig"
+    dest: "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
     owner: root
     group: root
     mode: 0644
