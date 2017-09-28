@@ -9,7 +9,7 @@
   tags:
     - k8s-worker
 
- - name: Ensure Kubernetes config directory
+- name: Ensure Kubernetes config directory
   file:
     path: "{{k8s_conf_dir}}"
     state: directory
