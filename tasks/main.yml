@@ -9,16 +9,6 @@
   tags:
     - k8s-worker
 
-- name: Ensure Kubernetes config directory
-  file:
-    path: "{{k8s_conf_dir}}"
-    state: directory
-    mode: 0700
-    owner: root
-    group: root
-  tags:
-    - k8s-worker
-
 - name: Ensure Kubelet config directory
   file:
     path: "{{k8s_worker_kubelet_conf_dir}}"
