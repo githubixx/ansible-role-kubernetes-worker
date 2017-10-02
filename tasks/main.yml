@@ -51,8 +51,8 @@
 
 - name: Copy worker certificates (part 2)
   copy:
-    src: "{{k8s_ca_conf_directory}}/cert-{{hostvars[inventory_hostname]}}.pem"
-    dest: "{{k8s_conf_dir}}/cert-{{hostvars[inventory_hostname]}}.pem"
+    src: "{{k8s_ca_conf_directory}}/cert-{{inventory_hostname}}.pem"
+    dest: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}.pem"
     mode: 0640
     owner: root
     group: root
@@ -61,8 +61,8 @@
 
 - name: Copy worker certificates (part 3)
   copy:
-    src: "{{k8s_ca_conf_directory}}/cert-{{hostvars[inventory_hostname]}}-key.pem"
-    dest: "{{k8s_conf_dir}}/cert-{{hostvars[inventory_hostname]}}-key.pem"
+    src: "{{k8s_ca_conf_directory}}/cert-{{inventory_hostname}}-key.pem"
+    dest: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}-key.pem"
     mode: 0640
     owner: root
     group: root
@@ -108,7 +108,7 @@
 
 - name: Create Kubelet kubeconfig
   template:
-    src: "{{k8s_config_directory}}/{{hostvars[inventory_hostname]}}.kubeconfig"
+    src: "{{k8s_config_directory}}/{{inventory_hostname}}.kubeconfig"
     dest: "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
     owner: root
     group: root
