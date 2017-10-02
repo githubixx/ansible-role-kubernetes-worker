@@ -36,6 +36,8 @@ k8s_worker_kubelet_cloud_provider: ""
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 k8s_worker_kubeproxy_proxy_mode: "iptables"
 
+k8s_controller_manager_cluster_cidr: "10.200.0.0/16"
+
 k8s_cluster_dns: "10.32.0.254"
 k8s_cluster_domain: "cluster.local"
 
