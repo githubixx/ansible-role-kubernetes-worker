@@ -12,7 +12,7 @@ Requires=docker.service
 
 [Service]
 ExecStart={{k8s_bin_dir}}/kubelet \
-  --allow-privileged={{k8s_worker_kublet_allow_privileged}} \
+  --allow-privileged={{k8s_worker_kubelet_allow_privileged}} \
   --cluster-dns={{k8s_cluster_dns}} \
   --cluster-domain={{k8s_cluster_domain}} \
   --container-runtime={{k8s_worker_kubelet_container_runtime}} \
