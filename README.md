@@ -14,7 +14,7 @@ Role Variables
 ```
 k8s_ca_conf_directory: /etc/k8s/certs
 
-k8s_download_dir: /opt/tmp
+k8s_worker_download_dir: /opt/tmp
 
 k8s_interface: tap0
 k8s_conf_dir: /var/lib/kubernetes
