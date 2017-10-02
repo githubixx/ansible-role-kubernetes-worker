@@ -23,8 +23,8 @@ ExecStart={{k8s_bin_dir}}/kubelet \
   --network-plugin={{k8s_network_plugin}} \
   --register-node={{k8s_worker_kubelet_register_node}} \
   --runtime-request-timeout={{k8s_worker_kubelet_runtime_request_timeout}} \
-  --tls-cert-file={{k8s_ca_conf_directory}}/cert-k8s-apiserver.pem \
-  --tls-private-key-file={{k8s_ca_conf_directory}}/cert-k8s-apiserver-key.pem \
+  --tls-cert-file={{k8s_conf_dir}}/cert-k8s-apiserver.pem \
+  --tls-private-key-file={{k8s_conf_dir}}/cert-k8s-apiserver-key.pem \
   --require-kubeconfig \
   --address={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
   --node-ip={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
