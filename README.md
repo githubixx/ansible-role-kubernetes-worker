@@ -31,7 +31,7 @@ k8s_certificates:
   - kubernetes-key.pem
   - kubernetes.pem
 
-k8s_kubelet_conf_dir: /var/lib/kubelet
+k8s_worker_kubelet_conf_dir: /var/lib/kubelet
 ```
 
 Dependencies

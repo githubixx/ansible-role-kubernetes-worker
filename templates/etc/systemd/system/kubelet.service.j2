@@ -19,7 +19,7 @@ ExecStart={{k8s_bin_dir}}/kubelet \
   --docker={{k8s_worker_kubelet_docker}} \
   --enable-custom-metrics \
   --image-pull-progress-deadline={{k8s_worker_kubelet_image_pull_progress_deadline}} \
-  --kubeconfig={{k8s_kubelet_conf_dir}}/kubeconfig \
+  --kubeconfig={{k8s_worker_kubelet_conf_dir}}/kubeconfig \
   --network-plugin={{k8s_network_plugin}} \
   --register-node={{k8s_worker_kubelet_register_node}} \
   --runtime-request-timeout={{k8s_worker_kubelet_runtime_request_timeout}} \
