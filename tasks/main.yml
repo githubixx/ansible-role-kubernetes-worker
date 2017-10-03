@@ -79,6 +79,16 @@
   tags:
     - k8s-worker
 
+- name: Ensure CNI bin directory
+  file:
+    path: "{{k8s_cni_bin_dir}}"
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+  tags:
+    - k8s-worker
+
 - name: Download CNI plugins
   get_url:
     url: https://github.com/containernetworking/plugins/releases/download/v{{k8s_cni_plugin_version}}/cni-plugins-amd64-v{{k8s_cni_plugin_version}}.tgz
@@ -90,9 +100,9 @@
 - name: Unzip CNI plugins
   unarchive:
     src: "{{k8s_worker_download_dir}}/{{k8s_cni_plugin_version}}.tgz"
-    dest: "{{k8s_cni_dir}}"
+    dest: "{{k8s_cni_bin_dir}}"
     remote_src: yes
-    creates: "{{k8s_cni_dir}}/bin/cnitool"
+    creates: "{{k8s_cni_dir}}/bin/bridge"
   tags:
     - k8s-worker
 
