@@ -29,7 +29,7 @@
   tags:
     - k8s-worker
 
-- name: Create download directory (used to store archives)
+- name: Ensure download directory (used to store archives)
   file:
     path: "{{k8s_worker_download_dir}}"
     state: directory
