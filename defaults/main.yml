@@ -30,7 +30,7 @@ k8s_worker_kubelet_docker: "unix:///var/run/docker.sock"
 k8s_worker_kubelet_image_pull_progress_deadline: "2m"
 k8s_worker_kubelet_register_node: "true"
 k8s_worker_kubelet_runtime_request_timeout: "10m"
-k8s_worker_kubelet_cadvisor_port: "4194"
+k8s_worker_kubelet_cadvisor_port: "4194" # port or "0" to disable
 k8s_worker_kubelet_cloud_provider: ""
 
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
