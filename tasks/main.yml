@@ -37,6 +37,21 @@
   tags:
     - k8s-worker
 
+- name: Install some network packages
+  apt:
+    state: installed
+    pkg: "{{item}}"
+  with_items:
+    - ebtables
+    - ethtool
+    - ipset
+    - conntrack
+    - iptables
+    - iptstate
+    - netstat-nat
+  tags:
+    - k8s-worker
+
 - name: Copy worker certificates (part 1)
   copy:
     src: "{{k8s_ca_conf_directory}}/{{item}}"
