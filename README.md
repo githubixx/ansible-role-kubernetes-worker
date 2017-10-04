@@ -19,7 +19,7 @@ k8s_worker_download_dir: /opt/tmp
 k8s_interface: tap0
 k8s_conf_dir: /var/lib/kubernetes
 k8s_bin_dir: /usr/local/bin
-k8s_release: 1.7.6
+k8s_release: 1.8.0
 k8s_cni_dir: /opt/cni
 k8s_cni_plugin_version: 0.6.0
 k8s_worker_binaries:
