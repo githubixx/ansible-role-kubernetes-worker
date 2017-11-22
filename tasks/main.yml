@@ -166,8 +166,6 @@
   tags:
     - k8s-worker
 
-- meta: flush_handlers
-
 - name: Enable Kubelet
   service:
     name: kubelet
@@ -197,8 +195,6 @@
     - reload systemd
   tags:
     - k8s-worker
-
-- meta: flush_handlers
 
 - name: Enable kube-proxy
   service:
