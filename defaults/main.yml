@@ -33,6 +33,7 @@ k8s_worker_kubelet_runtime_request_timeout: "10m"
 k8s_worker_kubelet_cadvisor_port: "4194" # port or "0" to disable
 k8s_worker_kubelet_cloud_provider: ""
 k8s_worker_kubelet_healthz_port: "10248"
+k8s_worker_kubelet_fail_swap_on: "false"
 
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 k8s_worker_kubeproxy_proxy_mode: "iptables"

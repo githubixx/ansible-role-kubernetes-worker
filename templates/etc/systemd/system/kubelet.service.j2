@@ -35,6 +35,7 @@ ExecStart={{k8s_bin_dir}}/kubelet \
   --cni-conf-dir={{k8s_cni_conf_dir}} \
   --cni-bin-dir={{k8s_cni_bin_dir}} \
   --serialize-image-pulls={{k8s_worker_kubelet_serialize_image_pulls}} \
+  --fail-swap-on={{k8s_worker_kubelet_fail_swap_on}} \
   --v=2
 
 Restart=on-failure
