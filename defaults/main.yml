@@ -1,7 +1,13 @@
 ---
+# The directory to store the K8s certificates and other configuration
 k8s_conf_dir: "/var/lib/kubernetes"
+# The directory to store the K8s binaries
 k8s_bin_dir: "/usr/local/bin"
+# K8s release
 k8s_release: "1.8.4"
+# The interface on which the K8s services should listen on. As all cluster
+# communication should use the PeerVPN interface the interface name is
+# normally "tap0" or "peervpn0".
 k8s_interface: "tap0"
 
 # The directory from where to copy the K8s certificates. By default this
@@ -15,11 +21,13 @@ k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
 # rule applies as with "k8s_ca_conf_directory"
 k8s_config_directory: "{{ '~/k8s/configs' | expanduser }}"
 
+# K8s worker binaries to download
 k8s_worker_binaries:
   - kube-proxy
   - kubelet
   - kubectl
 
+# Certificate/CA files for API server and kube-proxy
 k8s_worker_certificates:
   - ca-k8s-apiserver.pem
   - ca-k8s-apiserver-key.pem
@@ -28,6 +36,7 @@ k8s_worker_certificates:
   - cert-kube-proxy.pem
   - cert-kube-proxy-key.pem
 
+# Download directory for archive files
 k8s_worker_download_dir: "/opt/tmp"
 
 k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
@@ -42,16 +51,21 @@ k8s_worker_kubelet_cadvisor_port: "4194" # port or "0" to disable
 k8s_worker_kubelet_cloud_provider: ""
 k8s_worker_kubelet_healthz_port: "10248"
 
+# Directroy to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 k8s_worker_kubeproxy_proxy_mode: "iptables"
 
 k8s_controller_manager_cluster_cidr: "10.200.0.0/16"
 
+# IP of Kube-DNS
 k8s_cluster_dns: "10.32.0.254"
+# Internal Kubernetes cluster domain
 k8s_cluster_domain: "cluster.local"
 
+# Kubernetes network plugin
 k8s_network_plugin: "cni"
 
+# CNI network plugin settings
 k8s_cni_dir: "/opt/cni"
 k8s_cni_bin_dir: "{{k8s_cni_dir}}/bin"
 k8s_cni_conf_dir: "/etc/cni/net.d"
