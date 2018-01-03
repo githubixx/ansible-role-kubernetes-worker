@@ -82,6 +82,7 @@ k8s_worker_kubelet_settings:
   "network-plugin": "cni"
   "cni-conf-dir": "{{k8s_cni_conf_dir}}"
   "cni-bin-dir": "{{k8s_cni_bin_dir}}"
+  "fail-swap-on": "false"
 
 # Directroy to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
