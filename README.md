@@ -104,9 +104,9 @@ k8s_cni_plugin_version: "0.6.0"
 Dependencies
 ------------
 
-https://galaxy.ansible.com/githubixx/kubernetes-controller/
-https://galaxy.ansible.com/githubixx/docker/
-https://galaxy.ansible.com/githubixx/flanneld/
+- https://galaxy.ansible.com/githubixx/kubernetes-controller/
+- https://galaxy.ansible.com/githubixx/docker/
+- https://galaxy.ansible.com/githubixx/flanneld/
 
 Example Playbook
 ----------------
