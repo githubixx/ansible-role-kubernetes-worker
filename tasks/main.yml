@@ -171,6 +171,12 @@
   tags:
     - k8s-worker
 
+- name: Combine k8s_worker_kubelet_settings and k8s_worker_kubelet_settings_user (if defined)
+  set_fact:
+    k8s_worker_kubelet_settings: "{{k8s_worker_kubelet_settings | combine(k8s_worker_kubelet_settings_user|default({})) }}"
+  tags:
+    - k8s-worker
+
 - name: Create kubelet.service systemd file
   template:
     src: etc/systemd/system/kubelet.service.j2
@@ -198,6 +204,12 @@
     mode: 0700
     owner: root
     group: root
+  tags:
+    - k8s-worker
+
+- name: Combine k8s_worker_kubeproxy_settings and k8s_worker_kubeproxy_settings_user (if defined)
+  set_fact:
+    k8s_worker_kubeproxy_settings: "{{k8s_worker_kubeproxy_settings | combine(k8s_worker_kubeproxy_settings_user|default({})) }}"
   tags:
     - k8s-worker
 
