@@ -51,6 +51,23 @@
     - netstat-nat
   tags:
     - k8s-worker
+  when: ansible_os_family == "Debian"
+
+- name: Install some network packages
+  yum:
+    state: installed
+    name: "{{item}}"
+  with_items:
+    - ebtables
+    - ethtool
+    - ipset
+    - conntrack
+    - iptables
+    - iptstate
+    - net-tools
+  tags:
+    - k8s-worker
+  when: ansible_os_family == "RedHat"
 
 - name: Copy worker certificates (part 1)
   copy:
