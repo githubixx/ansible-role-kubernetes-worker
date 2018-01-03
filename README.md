@@ -60,7 +60,8 @@ k8s_worker_download_dir: "/opt/tmp"
 # Directory to store kubelet configuration
 k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 
-# kubelet settings
+# kubelet settings (can be overriden or additional added by defining
+# "k8s_worker_kubelet_settings_user")
 k8s_worker_kubelet_settings:
   "allow-privileged": "true"
   "cluster-domain": "cluster.local"
@@ -85,7 +86,8 @@ k8s_worker_kubelet_settings:
 # Directroy to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 
-# kube-proxy settings
+# kube-proxy settings (can be overriden or additional added by defining
+# "k8s_worker_kubeproxy_settings_user")
 k8s_worker_kubeproxy_settings:
   "proxy-mode": "iptables"
   "cluster-cidr": "10.200.0.0/16"
