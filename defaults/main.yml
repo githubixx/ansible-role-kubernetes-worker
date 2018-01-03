@@ -68,9 +68,11 @@ k8s_worker_kubelet_settings:
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 
 # kube-proxy settings
-k8s_worker_kubeproxy_proxy_mode: "iptables"
-
-k8s_controller_manager_cluster_cidr: "10.200.0.0/16"
+k8s_worker_kubeproxy_settings:
+  "proxy-mode": "iptables"
+  "cluster-cidr": "10.200.0.0/16"
+  "masquerade-all": "true"
+  "kubeconfig": "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
 
 # CNI network plugin settings
 k8s_cni_dir: "/opt/cni"

@@ -17,9 +17,15 @@ Role Variables
 --------------
 
 ```
+# The directory to store the K8s certificates and other configuration
 k8s_conf_dir: "/var/lib/kubernetes"
+# The directory to store the K8s binaries
 k8s_bin_dir: "/usr/local/bin"
-k8s_release: "1.8.0"
+# K8s release
+k8s_release: "1.8.4"
+# The interface on which the K8s services should listen on. As all cluster
+# communication should use the PeerVPN interface the interface name is
+# normally "tap0" or "peervpn0".
 k8s_interface: "tap0"
 
 # The directory from where to copy the K8s certificates. By default this
@@ -33,11 +39,13 @@ k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
 # rule applies as with "k8s_ca_conf_directory"
 k8s_config_directory: "{{ '~/k8s/configs' | expanduser }}"
 
+# K8s worker binaries to download
 k8s_worker_binaries:
   - kube-proxy
   - kubelet
   - kubectl
 
+# Certificate/CA files for API server and kube-proxy
 k8s_worker_certificates:
   - ca-k8s-apiserver.pem
   - ca-k8s-apiserver-key.pem
@@ -46,30 +54,45 @@ k8s_worker_certificates:
   - cert-kube-proxy.pem
   - cert-kube-proxy-key.pem
 
+# Download directory for archive files
 k8s_worker_download_dir: "/opt/tmp"
 
+# Directory to store kubelet configuration
 k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
-k8s_worker_kubelet_serialize_image_pulls: "false"
-k8s_worker_kubelet_allow_privileged: "true"
-k8s_worker_kubelet_container_runtime: "docker"
-k8s_worker_kubelet_docker: "unix:///var/run/docker.sock"
-k8s_worker_kubelet_image_pull_progress_deadline: "2m"
-k8s_worker_kubelet_register_node: "true"
-k8s_worker_kubelet_runtime_request_timeout: "10m"
-k8s_worker_kubelet_cadvisor_port: "4194" # port or "0" to disable
-k8s_worker_kubelet_cloud_provider: ""
-k8s_worker_kubelet_healthz_port: "10248"
 
+# kubelet settings
+k8s_worker_kubelet_settings:
+  "allow-privileged": "true"
+  "cluster-domain": "cluster.local"
+  "cluster-dns": "10.32.0.254"
+  "container-runtime": "docker"
+  "docker": "unix:///var/run/docker.sock"
+  "enable-custom-metrics": "true"
+  "image-pull-progress-deadline": "2m"
+  "kubeconfig": "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
+  "register-node": "true"
+  "runtime-request-timeout": "10m"
+  "tls-cert-file": "{{k8s_conf_dir}}/cert-k8s-apiserver.pem"
+  "tls-private-key-file": "{{k8s_conf_dir}}/cert-k8s-apiserver-key.pem"
+  "serialize-image-pulls": "false"
+  "cadvisor-port": "4194" # port or "0" to disable
+  "healthz-port": "10248"
+  "cloud-provider": ""
+  "network-plugin": "cni"
+  "cni-conf-dir": "{{k8s_cni_conf_dir}}"
+  "cni-bin-dir": "{{k8s_cni_bin_dir}}"
+
+# Directroy to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
-k8s_worker_kubeproxy_proxy_mode: "iptables"
 
-k8s_controller_manager_cluster_cidr: "10.200.0.0/16"
+# kube-proxy settings
+k8s_worker_kubeproxy_settings:
+  "proxy-mode": "iptables"
+  "cluster-cidr": "10.200.0.0/16"
+  "masquerade-all": "true"
+  "kubeconfig": "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
 
-k8s_cluster_dns: "10.32.0.254"
-k8s_cluster_domain: "cluster.local"
-
-k8s_network_plugin: "cni"
-
+# CNI network plugin settings
 k8s_cni_dir: "/opt/cni"
 k8s_cni_bin_dir: "{{k8s_cni_dir}}/bin"
 k8s_cni_conf_dir: "/etc/cni/net.d"

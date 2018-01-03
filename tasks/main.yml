@@ -190,6 +190,12 @@
   tags:
     - k8s-worker
 
+- name: Combine k8s_worker_kubeproxy_settings and k8s_worker_kubeproxy_settings_user (if defined)
+  set_fact:
+    k8s_worker_kubeproxy_settings: "{{k8s_worker_kubeproxy_settings | combine(k8s_worker_kubeproxy_settings_user|default({})) }}"
+  tags:
+    - k8s-worker
+
 - name: Create kube-proxy.service systemd file
   template:
     src: etc/systemd/system/kube-proxy.service.j2
