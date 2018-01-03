@@ -3,6 +3,7 @@
 {%- set k8s_api_server_ip = hostvars[k8s_api_server]['ansible_' + k8s_interface].ipv4.address -%}
 
 {%- set x=k8s_worker_kubeproxy_settings.__setitem__('bind-address',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
+{%- set x=k8s_worker_kubeproxy_settings.__setitem__('healthz-bind-address',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
 
 [Unit]
 Description=Kubernetes Kube Proxy
