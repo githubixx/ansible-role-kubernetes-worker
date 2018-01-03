@@ -1,8 +1,13 @@
-{% macro k8s_controller_hosts() %}
+#jinja2: trim_blocks:False
+{%- macro k8s_controller_hosts() -%}
 {%- for host in groups['k8s_controller'] -%}
 https://{{hostvars[host]['ansible_' + k8s_interface].ipv4.address}}:6443{% if not loop.last %},{% endif %}
 {%- endfor -%}
-{% endmacro %}
+{%- endmacro -%}
+
+{%- set x=k8s_worker_kubelet_settings.__setitem__('address',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
+{%- set x=k8s_worker_kubelet_settings.__setitem__('node-ip',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
+{%- set x=k8s_worker_kubelet_settings.__setitem__('healthz-bind-address',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
 
 [Unit]
 Description=Kubernetes Kubelet
@@ -12,30 +17,9 @@ Requires=docker.service
 
 [Service]
 ExecStart={{k8s_bin_dir}}/kubelet \
-  --allow-privileged={{k8s_worker_kubelet_allow_privileged}} \
-  --cluster-dns={{k8s_cluster_dns}} \
-  --cluster-domain={{k8s_cluster_domain}} \
-  --container-runtime={{k8s_worker_kubelet_container_runtime}} \
-  --docker={{k8s_worker_kubelet_docker}} \
-  --enable-custom-metrics \
-  --image-pull-progress-deadline={{k8s_worker_kubelet_image_pull_progress_deadline}} \
-  --kubeconfig={{k8s_worker_kubelet_conf_dir}}/kubeconfig \
-  --network-plugin={{k8s_network_plugin}} \
-  --register-node={{k8s_worker_kubelet_register_node}} \
-  --runtime-request-timeout={{k8s_worker_kubelet_runtime_request_timeout}} \
-  --tls-cert-file={{k8s_conf_dir}}/cert-k8s-apiserver.pem \
-  --tls-private-key-file={{k8s_conf_dir}}/cert-k8s-apiserver-key.pem \
-  --require-kubeconfig \
-  --address={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
-  --node-ip={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
-  --healthz-bind-address={{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}} \
-  --healthz-port={{k8s_worker_kubelet_healthz_port}} \
-  --cadvisor-port={{k8s_worker_kubelet_cadvisor_port}} \
-  --cloud-provider={{k8s_worker_kubelet_cloud_provider}} \
-  --cni-conf-dir={{k8s_cni_conf_dir}} \
-  --cni-bin-dir={{k8s_cni_bin_dir}} \
-  --serialize-image-pulls={{k8s_worker_kubelet_serialize_image_pulls}} \
-  --v=2
+{%- for setting in k8s_worker_kubelet_settings|sort %}
+  --{{setting}}={{k8s_worker_kubelet_settings[setting]}} {% if not loop.last %}\{% endif %}
+{%- endfor %}
 
 Restart=on-failure
 RestartSec=5
