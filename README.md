@@ -13,6 +13,32 @@ Requirements
 
 This playbook expects that you already have rolled out the Kubernetes controller components (see https://galaxy.ansible.com/githubixx/kubernetes-controller/ and https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-6/). You also need Docker (https://galaxy.ansible.com/githubixx/docker/) and flannel (https://galaxy.ansible.com/githubixx/flanneld/) roles installed.
 
+Changelog
+---------
+
+**r4.0.0_v1.9.1**
+
+- move bind-address,healthz-bind-address out of kube-proxy.service.j2
+- remove unneeded macro from kubelet.service.j2 / move address,node-ip,healthz-bind-address out of kubelet.service.j2
+- restart kube-proxy/kubelet after service file change
+
+**r3.0.1_v1.9.1**
+
+- update to Kubernetes v1.9.1
+
+**r3.0.0_v1.9.0**
+
+- Disable fail-swap-on to evict fail when running kubelet on a machine with swap. With this option disabled, only show a warning in log files
+- update to Kubernetes v1.9.0
+- change defaults for k8s_ca_conf_directory and k8s_config_directory
+- more documentation for defaults
+- introduce flexible parameter settings for kubelet via k8s_worker_kubelet_settings and k8s_worker_kubelet_settings_user
+- introduce flexible parameter settings for kube-proxy vi k8s_worker_kubeproxy_settings and k8s_worker_kubeproxy_settings_user
+- add kube-proxy healthz-bind-address setting
+- remove k8s_api_server/k8s_api_server_ip variables from kube-proxy.service.j2 (no longer needed)
+
+No changelog for releases < r3.0.0_v1.9.0 (see commit history if needed)
+
 Role Variables
 --------------
 
@@ -22,7 +48,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 # The directory to store the K8s binaries
 k8s_bin_dir: "/usr/local/bin"
 # K8s release
-k8s_release: "1.9.0"
+k8s_release: "1.9.1"
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use the PeerVPN interface the interface name is
 # normally "tap0" or "peervpn0".
@@ -63,6 +89,8 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 # kubelet settings (can be overriden or additional added by defining
 # "k8s_worker_kubelet_settings_user")
 k8s_worker_kubelet_settings:
+  "address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
+  "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "allow-privileged": "true"
   "cluster-domain": "cluster.local"
   "cluster-dns": "10.32.0.254"
@@ -77,6 +105,7 @@ k8s_worker_kubelet_settings:
   "tls-private-key-file": "{{k8s_conf_dir}}/cert-k8s-apiserver-key.pem"
   "serialize-image-pulls": "false"
   "cadvisor-port": "4194" # port or "0" to disable
+  "healthz-bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "healthz-port": "10248"
   "cloud-provider": ""
   "network-plugin": "cni"
@@ -90,6 +119,8 @@ k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 # kube-proxy settings (can be overriden or additional added by defining
 # "k8s_worker_kubeproxy_settings_user")
 k8s_worker_kubeproxy_settings:
+  "bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
+  "healthz-bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "proxy-mode": "iptables"
   "cluster-cidr": "10.200.0.0/16"
   "masquerade-all": "true"
