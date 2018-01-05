@@ -1,14 +1,4 @@
 #jinja2: trim_blocks:False
-{%- macro k8s_controller_hosts() -%}
-{%- for host in groups['k8s_controller'] -%}
-https://{{hostvars[host]['ansible_' + k8s_interface].ipv4.address}}:6443{% if not loop.last %},{% endif %}
-{%- endfor -%}
-{%- endmacro -%}
-
-{%- set x=k8s_worker_kubelet_settings.__setitem__('address',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
-{%- set x=k8s_worker_kubelet_settings.__setitem__('node-ip',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
-{%- set x=k8s_worker_kubelet_settings.__setitem__('healthz-bind-address',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
-
 [Unit]
 Description=Kubernetes Kubelet
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes

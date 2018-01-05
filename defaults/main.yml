@@ -44,6 +44,8 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 
 # kubelet settings
 k8s_worker_kubelet_settings:
+  "address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
+  "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "allow-privileged": "true"
   "cluster-domain": "cluster.local"
   "cluster-dns": "10.32.0.254"
@@ -58,6 +60,7 @@ k8s_worker_kubelet_settings:
   "tls-private-key-file": "{{k8s_conf_dir}}/cert-k8s-apiserver-key.pem"
   "serialize-image-pulls": "false"
   "cadvisor-port": "4194" # port or "0" to disable
+  "healthz-bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "healthz-port": "10248"
   "cloud-provider": ""
   "network-plugin": "cni"
