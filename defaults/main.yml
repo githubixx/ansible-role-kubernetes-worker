@@ -73,6 +73,8 @@ k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 
 # kube-proxy settings
 k8s_worker_kubeproxy_settings:
+  "bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
+  "healthz-bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "proxy-mode": "iptables"
   "cluster-cidr": "10.200.0.0/16"
   "masquerade-all": "true"

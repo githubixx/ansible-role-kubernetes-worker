@@ -1,7 +1,4 @@
 #jinja2: trim_blocks:False
-{%- set x=k8s_worker_kubeproxy_settings.__setitem__('bind-address',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
-{%- set x=k8s_worker_kubeproxy_settings.__setitem__('healthz-bind-address',hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address) -%}
-
 [Unit]
 Description=Kubernetes Kube Proxy
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes
