@@ -51,7 +51,8 @@ k8s_bin_dir: "/usr/local/bin"
 k8s_release: "1.9.1"
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use the PeerVPN interface the interface name is
-# normally "tap0" or "peervpn0".
+# normally "tap0" or "peervpn0". But in general you can use any interface
+# you want as long as this interface is reachable for the other K8s nodes.
 k8s_interface: "tap0"
 
 # The directory from where to copy the K8s certificates. By default this
