@@ -16,6 +16,10 @@ This playbook expects that you already have rolled out the Kubernetes controller
 Changelog
 ---------
 
+**r4.1.0_v1.9.3**
+
+- remove obsolet kubeconfig.j2 template
+
 **r4.0.0_v1.9.3**
 
 - set `k8s_release` to `1.9.3`
