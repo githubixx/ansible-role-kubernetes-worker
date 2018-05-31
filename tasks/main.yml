@@ -39,7 +39,7 @@
 
 - name: Install some network packages
   apt:
-    state: installed
+    state: present
     pkg: "{{item}}"
   with_items:
     - ebtables
@@ -55,7 +55,7 @@
 
 - name: Install some network packages
   yum:
-    state: installed
+    state: present
     name: "{{item}}"
   with_items:
     - ebtables

@@ -16,6 +16,10 @@ This playbook expects that you already have rolled out the Kubernetes controller
 Changelog
 ---------
 
+**r4.1.1_v1.9.3**
+
+- changed deprecated Ansible state (https://github.com/githubixx/ansible-role-kubernetes-worker/issues/8)
+
 **r4.1.0_v1.9.3**
 
 - remove obsolet kubeconfig.j2 template
