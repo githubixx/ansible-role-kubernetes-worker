@@ -16,6 +16,10 @@ This playbook expects that you already have rolled out the Kubernetes controller
 Changelog
 ---------
 
+**r5.0.0_v1.10.4**
+
+- update `k8s_release` to `1.10.4`
+
 **r4.1.1_v1.9.8**
 
 - set `k8s_release` to `1.9.8`
