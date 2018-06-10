@@ -47,7 +47,6 @@ k8s_worker_kubelet_settings:
   "config": "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
   "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "container-runtime": "docker"
-  "docker": "unix:///var/run/dockershim.sock"
   "image-pull-progress-deadline": "2m"
   "kubeconfig": "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
   "network-plugin": "cni"
