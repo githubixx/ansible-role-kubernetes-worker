@@ -86,7 +86,7 @@ k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 
 # kube-proxy settings
 k8s_worker_kubeproxy_settings:
-  "kubeconfig": "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
+  "config": "{{k8s_worker_kubeproxy_conf_dir}}/kubeproxy-config.yaml"
 
 k8s_worker_kubeproxy_conf_yaml: |
   kind: KubeProxyConfiguration
