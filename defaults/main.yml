@@ -44,7 +44,7 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 
 # kubelet settings
 k8s_worker_kubelet_settings:
-  "config": ""
+  "config": "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
   "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "container-runtime": "docker"
   "docker": "unix:///var/run/dockershim.sock"
