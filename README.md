@@ -19,6 +19,15 @@ Changelog
 **r5.0.0_v1.10.4**
 
 - update `k8s_release` to `1.10.4`
+- introduce `k8s_worker_kubelet_conf_yaml` variable
+- removed deprecated setttings in `k8s_worker_kubelet_settings`
+- moved settings in `k8s_worker_kubelet_settings` to `k8s_worker_kubelet_conf_yaml`:
+  see https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/
+  see https://github.com/kubernetes/kubernetes/blob/release-1.10/pkg/kubelet/apis/kubeletconfig/v1beta1/types.go
+- introduce `k8s_worker_kubeproxy_conf_yaml` variable
+- removed deprecated settings in `k8s_worker_kubeproxy_settings`
+- moved settings in `k8s_worker_kubeproxy_settings` to `k8s_worker_kubeproxy_conf_yaml`:
+  see: https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/apis/kubeproxyconfig/v1alpha1/types.go
 
 **r4.1.1_v1.9.8**
 
@@ -68,7 +77,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 # The directory to store the K8s binaries
 k8s_bin_dir: "/usr/local/bin"
 # K8s release
-k8s_release: "1.9.1"
+k8s_release: "1.10.4"
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use the PeerVPN interface the interface name is
 # normally "tap0" or "peervpn0". But in general you can use any interface
@@ -110,29 +119,41 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 # kubelet settings (can be overriden or additional added by defining
 # "k8s_worker_kubelet_settings_user")
 k8s_worker_kubelet_settings:
-  "address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
+  "config": "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
   "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
-  "allow-privileged": "true"
-  "cluster-domain": "cluster.local"
-  "cluster-dns": "10.32.0.254"
   "container-runtime": "docker"
-  "docker": "unix:///var/run/docker.sock"
-  "enable-custom-metrics": "true"
   "image-pull-progress-deadline": "2m"
   "kubeconfig": "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
-  "register-node": "true"
-  "runtime-request-timeout": "10m"
-  "tls-cert-file": "{{k8s_conf_dir}}/cert-k8s-apiserver.pem"
-  "tls-private-key-file": "{{k8s_conf_dir}}/cert-k8s-apiserver-key.pem"
-  "serialize-image-pulls": "false"
-  "cadvisor-port": "4194" # port or "0" to disable
-  "healthz-bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
-  "healthz-port": "10248"
-  "cloud-provider": ""
   "network-plugin": "cni"
   "cni-conf-dir": "{{k8s_cni_conf_dir}}"
   "cni-bin-dir": "{{k8s_cni_bin_dir}}"
-  "fail-swap-on": "false"
+  "cloud-provider": ""
+  "register-node": "true"
+
+# kublet kubeconfig
+k8s_worker_kubelet_conf_yaml: |
+  kind: KubeletConfiguration
+  apiVersion: kubelet.config.k8s.io/v1beta1
+  address: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}
+  authentication:
+    anonymous:
+      enabled: false
+    webhook:
+      enabled: true
+    x509:
+      clientCAFile: "{{k8s_conf_dir}}/ca-k8s-apiserver.pem"
+  authorization:
+    mode: Webhook
+  clusterDomain: "cluster.local"
+  clusterDNS:
+    - "10.32.0.254"
+  failSwapOn: true
+  healthzBindAddress: "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
+  healthzPort: "10248"
+  runtimeRequestTimeout: "15m"
+  serializeImagePulls: false
+  tlsCertFile: "{{k8s_conf_dir}}/cert-k8s-apiserver.pem"
+  tlsPrivateKeyFile: "{{k8s_conf_dir}}/cert-k8s-apiserver-key.pem"
 
 # Directroy to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
@@ -140,12 +161,18 @@ k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 # kube-proxy settings (can be overriden or additional added by defining
 # "k8s_worker_kubeproxy_settings_user")
 k8s_worker_kubeproxy_settings:
-  "bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
-  "healthz-bind-address": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
-  "proxy-mode": "iptables"
-  "cluster-cidr": "10.200.0.0/16"
-  "masquerade-all": "true"
-  "kubeconfig": "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
+  "config": "{{k8s_worker_kubeproxy_conf_dir}}/kubeproxy-config.yaml"
+
+k8s_worker_kubeproxy_conf_yaml: |
+  kind: KubeProxyConfiguration
+  apiVersion: kubeproxy.config.k8s.io/v1alpha1
+  bindAddress: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}
+  clientConnection:
+    kubeconfig: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
+  healthzBindAddress: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}:10256
+  masqueradeAll: true
+  mode: "iptables"
+  clusterCIDR: "10.200.0.0/16"
 
 # CNI network plugin settings
 k8s_cni_dir: "/opt/cni"
