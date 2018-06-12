@@ -28,7 +28,7 @@ Changelog
 - removed deprecated settings in `k8s_worker_kubeproxy_settings`
 - moved settings in `k8s_worker_kubeproxy_settings` to `k8s_worker_kubeproxy_conf_yaml`:
   see: https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/apis/kubeproxyconfig/v1alpha1/types.go
-- certificate file names for kube-proxy changed: `cert-kube-proxy(-key).pem` -> `cert-k8s-proxy(-key).pem`
+- remove cert-k8s-proxy* from k8s_worker_certificates because no longer needed
 
 **r4.1.1_v1.9.8**
 
@@ -108,8 +108,6 @@ k8s_worker_certificates:
   - ca-k8s-apiserver-key.pem
   - cert-k8s-apiserver.pem
   - cert-k8s-apiserver-key.pem
-  - cert-k8s-proxy.pem
-  - cert-k8s-proxy-key.pem
 
 # Download directory for archive files
 k8s_worker_download_dir: "/opt/tmp"
@@ -150,7 +148,7 @@ k8s_worker_kubelet_conf_yaml: |
     - "10.32.0.254"
   failSwapOn: true
   healthzBindAddress: "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
-  healthzPort: "10248"
+  healthzPort: 10248
   runtimeRequestTimeout: "15m"
   serializeImagePulls: false
   tlsCertFile: "{{k8s_conf_dir}}/cert-k8s-apiserver.pem"
