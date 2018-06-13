@@ -151,7 +151,7 @@
   tags:
     - k8s-worker
 
-- name: Create Kubelet kubeconfig
+- name: Create kubelet kubeconfig
   template:
     src: "{{k8s_config_directory}}/{{inventory_hostname}}.kubeconfig"
     dest: "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
@@ -161,7 +161,7 @@
   tags:
     - k8s-worker
 
-- name: Create Kubeproxy kubeconfig
+- name: Create kubeproxy kubeconfig
   template:
     src: "{{k8s_config_directory}}/kube-proxy.kubeconfig"
     dest: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
@@ -170,6 +170,24 @@
     mode: 0644
   tags:
     - k8s-worker
+
+- name: Create kubelet-config.yaml
+  copy:
+    content: "{{k8s_worker_kubelet_conf_yaml}}"
+    dest: "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
+    mode: 0600
+  tags:
+    - k8s-worker
+    - kubelet-config-yaml
+
+- name: Create kubeproxy-config.yaml
+  copy:
+    content: "{{k8s_worker_kubeproxy_conf_yaml}}"
+    dest: "{{k8s_worker_kubeproxy_conf_dir}}/kubeproxy-config.yaml"
+    mode: 0600
+  tags:
+    - k8s-worker
+    - kubeproxy-config-yaml
 
 - name: Combine k8s_worker_kubelet_settings and k8s_worker_kubelet_settings_user (if defined)
   set_fact:
