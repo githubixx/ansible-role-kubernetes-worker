@@ -16,6 +16,10 @@ This playbook expects that you already have rolled out the Kubernetes controller
 Changelog
 ---------
 
+**r5.0.1_v1.10.4**
+
+- fix iptables bug in `k8s_worker_kubeproxy_conf_yaml`
+
 **r5.0.0_v1.10.4**
 
 - update `k8s_release` to `1.10.4`
@@ -28,7 +32,7 @@ Changelog
 - removed deprecated settings in `k8s_worker_kubeproxy_settings`
 - moved settings in `k8s_worker_kubeproxy_settings` to `k8s_worker_kubeproxy_conf_yaml`:
   see: https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/apis/kubeproxyconfig/v1alpha1/types.go
-- remove cert-k8s-proxy* from k8s_worker_certificates because no longer needed
+- remove cert-k8s-proxy... entries from `k8s_worker_certificates` because no longer needed
 
 **r4.1.1_v1.9.8**
 
@@ -60,12 +64,12 @@ Changelog
 
 - Disable fail-swap-on to evict fail when running kubelet on a machine with swap. With this option disabled, only show a warning in log files
 - update to Kubernetes v1.9.0
-- change defaults for k8s_ca_conf_directory and k8s_config_directory
+- change defaults for `k8s_ca_conf_directory` and `k8s_config_directory`
 - more documentation for defaults
-- introduce flexible parameter settings for kubelet via k8s_worker_kubelet_settings and k8s_worker_kubelet_settings_user
-- introduce flexible parameter settings for kube-proxy vi k8s_worker_kubeproxy_settings and k8s_worker_kubeproxy_settings_user
+- introduce flexible parameter settings for kubelet via `k8s_worker_kubelet_settings` and `k8s_worker_kubelet_settings_user`
+- introduce flexible parameter settings for kube-proxy vi `k8s_worker_kubeproxy_settings` and `k8s_worker_kubeproxy_settings_user`
 - add kube-proxy healthz-bind-address setting
-- remove k8s_api_server/k8s_api_server_ip variables from kube-proxy.service.j2 (no longer needed)
+- remove `k8s_api_server/k8s_api_server_ip` variables from kube-proxy.service.j2 (no longer needed)
 
 No changelog for releases < r3.0.0_v1.9.0 (see commit history if needed)
 
@@ -169,8 +173,9 @@ k8s_worker_kubeproxy_conf_yaml: |
   clientConnection:
     kubeconfig: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
   healthzBindAddress: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}:10256
-  masqueradeAll: true
   mode: "iptables"
+  iptables:
+    masqueradeAll: true
   clusterCIDR: "10.200.0.0/16"
 
 # CNI network plugin settings
