@@ -93,8 +93,9 @@ k8s_worker_kubeproxy_conf_yaml: |
   clientConnection:
     kubeconfig: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
   healthzBindAddress: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}:10256
-  masqueradeAll: true
   mode: "iptables"
+  iptables:
+    masqueradeAll: true
   clusterCIDR: "10.200.0.0/16"
 
 # CNI network plugin settings
