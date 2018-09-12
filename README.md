@@ -1,7 +1,7 @@
 ansible-role-kubernetes-worker
 ==============================
 
-This Ansible playbook is used in [Kubernetes the not so hard way with Ansible (at Scaleway) - Part 7 - Worker](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-7/). This playbook installs Kubernetes worker including kubelet and kube-proxy. For more information please see [Kubernetes the not so hard way with Ansible (at Scaleway) - Part 7 - Worker](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-7/).
+This Ansible playbook is used in [Kubernetes the not so hard way with Ansible - Worker](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-worker/). This playbook installs Kubernetes worker including kubelet and kube-proxy. For more information please see [Kubernetes the not so hard way with Ansible - Worker](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-worker/).
 
 Versions
 --------
@@ -11,10 +11,15 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 Requirements
 ------------
 
-This playbook expects that you already have rolled out the Kubernetes controller components (see https://galaxy.ansible.com/githubixx/kubernetes-controller/ and https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-6/). You also need Docker (https://galaxy.ansible.com/githubixx/docker/) and flannel (https://galaxy.ansible.com/githubixx/flanneld/) roles installed.
+This playbook expects that you already have rolled out the Kubernetes controller components (see https://galaxy.ansible.com/githubixx/kubernetes-controller/ and https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-control-plane/). You also need Docker (https://galaxy.ansible.com/githubixx/docker/) and flannel (https://galaxy.ansible.com/githubixx/flanneld/) roles installed.
 
 Changelog
 ---------
+
+**r5.0.2_v1.10.4**
+
+- support Ubuntu 18.04
+- update README
 
 **r5.0.1_v1.10.4**
 
