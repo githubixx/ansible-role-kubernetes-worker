@@ -16,6 +16,10 @@ This playbook expects that you already have rolled out the Kubernetes controller
 Changelog
 ---------
 
+**r5.0.3_v1.10.4**
+
+- install `socat` and `netbase` packages
+
 **r5.0.2_v1.10.4**
 
 - support Ubuntu 18.04
