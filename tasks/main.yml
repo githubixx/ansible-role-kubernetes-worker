@@ -49,6 +49,8 @@
     - iptables
     - iptstate
     - netstat-nat
+    - socat
+    - netbase
   tags:
     - k8s-worker
   when: ansible_os_family == "Debian"
