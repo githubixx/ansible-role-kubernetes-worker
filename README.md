@@ -16,6 +16,10 @@ This playbook expects that you already have rolled out the Kubernetes controller
 Changelog
 ---------
 
+**r6.0.0_v1.10.4**
+
+- switch service routing from `iptables` to `ipvs`. IPVS (IP Virtual Server) is built on top of the Netfilter and implements transport-layer load balancing as part of the Linux kernel. Besides it increases scalability it's way easier to debug Kubernetes networking. Instead of having a look at hundrests or more iptable rules you just run `ipvsadm -Ln` and have a fast overview what Kubernetes service IP get's load balanced to which pod IPs. And if you have the pod IPs you can have a quick look with `ip route` about what routes exist and to figure out how packets for this service are handled. For further information see [IPVS-Based In-Cluster Load Balancing Deep Dive](https://kubernetes.io/blog/2018/07/09/ipvs-based-in-cluster-load-balancing-deep-dive/).
+
 **r5.0.3_v1.10.4**
 
 - install `socat` and `netbase` packages
@@ -182,7 +186,11 @@ k8s_worker_kubeproxy_conf_yaml: |
   clientConnection:
     kubeconfig: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
   healthzBindAddress: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}:10256
-  mode: "iptables"
+  mode: "ipvs"
+  ipvs:
+    minSyncPeriod: 0s
+    scheduler: ""
+    syncPeriod: 2s
   iptables:
     masqueradeAll: true
   clusterCIDR: "10.200.0.0/16"

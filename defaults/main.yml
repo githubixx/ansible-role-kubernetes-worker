@@ -93,7 +93,11 @@ k8s_worker_kubeproxy_conf_yaml: |
   clientConnection:
     kubeconfig: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
   healthzBindAddress: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}:10256
-  mode: "iptables"
+  mode: "ipvs"
+  ipvs:
+    minSyncPeriod: 0s
+    scheduler: ""
+    syncPeriod: 2s
   iptables:
     masqueradeAll: true
   clusterCIDR: "10.200.0.0/16"
