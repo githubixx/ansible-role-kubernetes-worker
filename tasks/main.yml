@@ -1,4 +1,18 @@
 ---
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+  tags:
+    - k8s-worker
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+  tags:
+    - k8s-worker
+
 - name: Create Kubernetes config directory
   file:
     path: "{{k8s_conf_dir}}"
