@@ -16,6 +16,10 @@ This playbook expects that you already have rolled out the Kubernetes controller
 Changelog
 ---------
 
+**r6.1.0_v1.10.4**
+
+- add task to disable swap in /etc/fstab and execute swapoff.
+
 **r6.0.0_v1.10.4**
 
 - switch service routing from `iptables` to `ipvs`. IPVS (IP Virtual Server) is built on top of the Netfilter and implements transport-layer load balancing as part of the Linux kernel. Besides it increases scalability it's way easier to debug Kubernetes networking. Instead of having a look at hundrests or more iptable rules you just run `ipvsadm -Ln` and have a fast overview what Kubernetes service IP get's load balanced to which pod IPs. And if you have the pod IPs you can have a quick look with `ip route` about what routes exist and to figure out how packets for this service are handled. For further information see [IPVS-Based In-Cluster Load Balancing Deep Dive](https://kubernetes.io/blog/2018/07/09/ipvs-based-in-cluster-load-balancing-deep-dive/).
