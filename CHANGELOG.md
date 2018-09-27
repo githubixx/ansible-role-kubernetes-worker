@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+**r6.1.1_v1.10.8**
+
+- update `k8s_release` to `1.10.8`
+
 **r6.1.0_v1.10.4**
 
 - add task to disable swap in /etc/fstab and execute swapoff.

@@ -16,7 +16,7 @@ This playbook expects that you already have rolled out the Kubernetes controller
 Changelog
 ---------
 
-see [CHANGELOG.md](CHANGELOG.md)
+see [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-worker/blob/master/CHANGELOG.md)
 
 Role Variables
 --------------
@@ -27,11 +27,10 @@ k8s_conf_dir: "/var/lib/kubernetes"
 # The directory to store the K8s binaries
 k8s_bin_dir: "/usr/local/bin"
 # K8s release
-k8s_release: "1.10.4"
+k8s_release: "1.10.8"
 # The interface on which the K8s services should listen on. As all cluster
-# communication should use the PeerVPN interface the interface name is
-# normally "tap0" or "peervpn0". But in general you can use any interface
-# you want as long as this interface is reachable for the other K8s nodes.
+# communication should use a VPN interface the interface name is
+# normally "wg0" (WireGuard),"peervpn0" (PeerVPN) or "tap0".
 k8s_interface: "tap0"
 
 # The directory from where to copy the K8s certificates. By default this
