@@ -27,7 +27,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 # The directory to store the K8s binaries
 k8s_bin_dir: "/usr/local/bin"
 # K8s release
-k8s_release: "1.10.8"
+k8s_release: "1.12.3"
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
 # normally "wg0" (WireGuard),"peervpn0" (PeerVPN) or "tap0".
@@ -63,9 +63,9 @@ k8s_worker_download_dir: "/opt/tmp"
 # Directory to store kubelet configuration
 k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 
-# kubelet settings (can be overriden or additional added by defining
-# "k8s_worker_kubelet_settings_user")
+# kubelet settings
 k8s_worker_kubelet_settings:
+  "allow-privileged": "true"
   "config": "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
   "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
   "container-runtime": "docker"
@@ -105,8 +105,7 @@ k8s_worker_kubelet_conf_yaml: |
 # Directroy to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 
-# kube-proxy settings (can be overriden or additional added by defining
-# "k8s_worker_kubeproxy_settings_user")
+# kube-proxy settings
 k8s_worker_kubeproxy_settings:
   "config": "{{k8s_worker_kubeproxy_conf_dir}}/kubeproxy-config.yaml"
 
