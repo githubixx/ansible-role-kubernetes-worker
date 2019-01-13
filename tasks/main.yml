@@ -54,17 +54,7 @@
 - name: Install some network packages
   apt:
     state: present
-    pkg: "{{ item }}"
-  with_items:
-    - ebtables
-    - ethtool
-    - ipset
-    - conntrack
-    - iptables
-    - iptstate
-    - netstat-nat
-    - socat
-    - netbase
+    pkg: ['ebtables', 'ethtool', 'ipset', 'conntrack', 'iptables', 'iptstate', 'netstat-nat', 'socat', 'netbase']
   tags:
     - k8s-worker
   when: ansible_os_family == "Debian"
@@ -72,15 +62,7 @@
 - name: Install some network packages
   yum:
     state: present
-    name: "{{ item }}"
-  with_items:
-    - ebtables
-    - ethtool
-    - ipset
-    - conntrack
-    - iptables
-    - iptstate
-    - net-tools
+    name: ['ebtables', 'ethtool', 'ipset', 'conntrack', 'iptables', 'iptstate', 'net-tools']
   tags:
     - k8s-worker
   when: ansible_os_family == "RedHat"
