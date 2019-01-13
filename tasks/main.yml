@@ -15,7 +15,7 @@
 
 - name: Create Kubernetes config directory
   file:
-    path: "{{k8s_conf_dir}}"
+    path: "{{ k8s_conf_dir }}"
     state: directory
     mode: 0700
     owner: root
@@ -25,7 +25,7 @@
 
 - name: Ensure Kubelet config directory
   file:
-    path: "{{k8s_worker_kubelet_conf_dir}}"
+    path: "{{ k8s_worker_kubelet_conf_dir }}"
     state: directory
     mode: 0700
     owner: root
@@ -35,7 +35,7 @@
 
 - name: Ensure Kubeproxy config directory
   file:
-    path: "{{k8s_worker_kubeproxy_conf_dir}}"
+    path: "{{ k8s_worker_kubeproxy_conf_dir }}"
     state: directory
     mode: 0700
     owner: root
@@ -45,7 +45,7 @@
 
 - name: Ensure download directory (used to store archives)
   file:
-    path: "{{k8s_worker_download_dir}}"
+    path: "{{ k8s_worker_download_dir }}"
     state: directory
     mode: 0750
   tags:
@@ -54,7 +54,7 @@
 - name: Install some network packages
   apt:
     state: present
-    pkg: "{{item}}"
+    pkg: "{{ item }}"
   with_items:
     - ebtables
     - ethtool
@@ -72,7 +72,7 @@
 - name: Install some network packages
   yum:
     state: present
-    name: "{{item}}"
+    name: "{{ item }}"
   with_items:
     - ebtables
     - ethtool
@@ -87,20 +87,20 @@
 
 - name: Copy worker certificates (part 1)
   copy:
-    src: "{{k8s_ca_conf_directory}}/{{item}}"
-    dest: "{{k8s_conf_dir}}/{{item}}"
+    src: "{{ k8s_ca_conf_directory }}/{{ item }}"
+    dest: "{{ k8s_conf_dir }}/{{ item }}"
     mode: 0640
     owner: root
     group: root
   with_items:
-    - "{{k8s_worker_certificates}}"
+    - "{{ k8s_worker_certificates }}"
   tags:
     - k8s-worker
 
 - name: Copy worker certificates (part 2)
   copy:
-    src: "{{k8s_ca_conf_directory}}/cert-{{inventory_hostname}}.pem"
-    dest: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}.pem"
+    src: "{{ k8s_ca_conf_directory }}/cert-{{ inventory_hostname }}.pem"
+    dest: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}.pem"
     mode: 0640
     owner: root
     group: root
@@ -109,8 +109,8 @@
 
 - name: Copy worker certificates (part 3)
   copy:
-    src: "{{k8s_ca_conf_directory}}/cert-{{inventory_hostname}}-key.pem"
-    dest: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}-key.pem"
+    src: "{{ k8s_ca_conf_directory }}/cert-{{ inventory_hostname }}-key.pem"
+    dest: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}-key.pem"
     mode: 0640
     owner: root
     group: root
@@ -119,7 +119,7 @@
 
 - name: Ensure CNI plugins directory
   file:
-    path: "{{k8s_cni_dir}}"
+    path: "{{ k8s_cni_dir }}"
     state: directory
     mode: 0700
     owner: root
@@ -129,7 +129,7 @@
 
 - name: Ensure CNI bin directory
   file:
-    path: "{{k8s_cni_bin_dir}}"
+    path: "{{ k8s_cni_bin_dir }}"
     state: directory
     mode: 0700
     owner: root
@@ -139,28 +139,28 @@
 
 - name: Download CNI plugins
   get_url:
-    url: https://github.com/containernetworking/plugins/releases/download/v{{k8s_cni_plugin_version}}/cni-plugins-amd64-v{{k8s_cni_plugin_version}}.tgz
-    dest: "{{k8s_worker_download_dir}}/{{k8s_cni_plugin_version}}.tgz"
+    url: "https://github.com/containernetworking/plugins/releases/download/v{{ k8s_cni_plugin_version }}/cni-plugins-amd64-v{{ k8s_cni_plugin_version }}.tgz"
+    dest: "{{ k8s_worker_download_dir }}/{{ k8s_cni_plugin_version }}.tgz"
     mode: 0640
   tags:
     - k8s-worker
 
 - name: Unzip CNI plugins
   unarchive:
-    src: "{{k8s_worker_download_dir}}/{{k8s_cni_plugin_version}}.tgz"
-    dest: "{{k8s_cni_bin_dir}}"
+    src: "{{ k8s_worker_download_dir }}/{{ k8s_cni_plugin_version }}.tgz"
+    dest: "{{ k8s_cni_bin_dir }}"
     remote_src: yes
-    creates: "{{k8s_cni_dir}}/bin/bridge"
+    creates: "{{ k8s_cni_dir }}/bin/bridge"
   tags:
     - k8s-worker
 
 - name: Downloading official Kubernetes worker binaries
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v{{k8s_release}}/bin/linux/amd64/{{item}}
-    dest: "{{k8s_bin_dir}}"
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_release }}/bin/linux/amd64/{{ item }}"
+    dest: "{{ k8s_bin_dir }}"
     mode: 0755
   with_items:
-    - "{{k8s_worker_binaries}}"
+    - "{{ k8s_worker_binaries }}"
   notify:
     - restart kube-proxy
     - restart kubelet
@@ -169,8 +169,8 @@
 
 - name: Create kubelet kubeconfig
   template:
-    src: "{{k8s_config_directory}}/{{inventory_hostname}}.kubeconfig"
-    dest: "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
+    src: "{{ k8s_config_directory }}/{{ inventory_hostname }}.kubeconfig"
+    dest: "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
     owner: root
     group: root
     mode: 0644
@@ -179,8 +179,8 @@
 
 - name: Create kubeproxy kubeconfig
   template:
-    src: "{{k8s_config_directory}}/kube-proxy.kubeconfig"
-    dest: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
+    src: "{{ k8s_config_directory }}/kube-proxy.kubeconfig"
+    dest: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
     owner: root
     group: root
     mode: 0644
@@ -189,8 +189,8 @@
 
 - name: Create kubelet-config.yaml
   copy:
-    content: "{{k8s_worker_kubelet_conf_yaml}}"
-    dest: "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
+    content: "{{ k8s_worker_kubelet_conf_yaml }}"
+    dest: "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
     mode: 0600
   tags:
     - k8s-worker
@@ -198,8 +198,8 @@
 
 - name: Create kubeproxy-config.yaml
   copy:
-    content: "{{k8s_worker_kubeproxy_conf_yaml}}"
-    dest: "{{k8s_worker_kubeproxy_conf_dir}}/kubeproxy-config.yaml"
+    content: "{{ k8s_worker_kubeproxy_conf_yaml }}"
+    dest: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeproxy-config.yaml"
     mode: 0600
   tags:
     - k8s-worker
@@ -207,7 +207,7 @@
 
 - name: Combine k8s_worker_kubelet_settings and k8s_worker_kubelet_settings_user (if defined)
   set_fact:
-    k8s_worker_kubelet_settings: "{{k8s_worker_kubelet_settings | combine(k8s_worker_kubelet_settings_user|default({})) }}"
+    k8s_worker_kubelet_settings: "{{ k8s_worker_kubelet_settings | combine(k8s_worker_kubelet_settings_user|default({})) }}"
   tags:
     - k8s-worker
 
@@ -234,7 +234,7 @@
 
 - name: Ensure Kubeproxy config directory
   file:
-    path: "{{k8s_worker_kubeproxy_conf_dir}}"
+    path: "{{ k8s_worker_kubeproxy_conf_dir }}"
     state: directory
     mode: 0700
     owner: root
@@ -244,7 +244,7 @@
 
 - name: Combine k8s_worker_kubeproxy_settings and k8s_worker_kubeproxy_settings_user (if defined)
   set_fact:
-    k8s_worker_kubeproxy_settings: "{{k8s_worker_kubeproxy_settings | combine(k8s_worker_kubeproxy_settings_user|default({})) }}"
+    k8s_worker_kubeproxy_settings: "{{ k8s_worker_kubeproxy_settings | combine(k8s_worker_kubeproxy_settings_user|default({})) }}"
   tags:
     - k8s-worker
 
