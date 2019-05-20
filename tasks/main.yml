@@ -124,15 +124,25 @@
     url: "https://github.com/containernetworking/plugins/releases/download/v{{ k8s_cni_plugin_version }}/cni-plugins-amd64-v{{ k8s_cni_plugin_version }}.tgz"
     dest: "{{ k8s_worker_download_dir }}/{{ k8s_cni_plugin_version }}.tgz"
     mode: 0640
+    checksum: "sha512:{{ k8s_cni_plugin_checksum }}"
   tags:
     - k8s-worker
+
+- name: Register sha512 checksum of downloaded CNI tarball
+  stat:
+    path: "{{ k8s_worker_download_dir }}/{{ k8s_cni_plugin_version }}.tgz"
+    checksum_algorithm: sha512
+  register: downloaded_cni_plugin_checksum
 
 - name: Unzip CNI plugins
   unarchive:
     src: "{{ k8s_worker_download_dir }}/{{ k8s_cni_plugin_version }}.tgz"
     dest: "{{ k8s_cni_bin_dir }}"
     remote_src: yes
-    creates: "{{ k8s_cni_dir }}/bin/bridge"
+  when:
+    downloaded_cni_plugin_checksum.stat.checksum|default('None') != k8s_cni_plugin_checksum
+  notify:
+    - restart kubelet
   tags:
     - k8s-worker
 
