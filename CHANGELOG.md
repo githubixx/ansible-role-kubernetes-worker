@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+**9.0.0+1.14.2**
+
+- update `k8s_release` to `1.14.2`
+- update `k8s_cni_plugin_version` to `0.7.5`
+- introduce `k8s_cni_plugin_checksum` variable to determine if CNI plugin tarball has changed and needs to be unarchived
+
 **8.0.1+1.13.5**
 
 - update `k8s_release` to `1.13.5`
