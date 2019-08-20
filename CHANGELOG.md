@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+**10.0.0+1.15.3**
+
+- update `k8s_release` to `1.15.3`
+- removed deprecated `--allow-privileged` kubelet flag (see [Node](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.15.md#node) in K8s changelog)
+
 **9.0.1+1.14.6**
 
 - update `k8s_release` to `1.14.6`
