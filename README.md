@@ -98,8 +98,8 @@ k8s_worker_kubelet_conf_yaml: |
   healthzPort: 10248
   runtimeRequestTimeout: "15m"
   serializeImagePulls: false
-  tlsCertFile: "{{k8s_conf_dir}}/cert-k8s-apiserver.pem"
-  tlsPrivateKeyFile: "{{k8s_conf_dir}}/cert-k8s-apiserver-key.pem"
+  tlsCertFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}.pem"
+  tlsPrivateKeyFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}-key.pem"
 
 # Directroy to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"

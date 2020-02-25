@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+**11.1.0+1.16.3**
+
+- `tlsCertFile` and `tlsPrivateKeyFile` options in `kubelet-config.yaml` used wrong certificate files
+
 **11.0.0+1.16.3**
 
 - update `k8s_release` to `1.16.3`
