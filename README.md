@@ -130,7 +130,7 @@ k8s_cni_bin_dir: "{{k8s_cni_dir}}/bin"
 k8s_cni_conf_dir: "/etc/cni/net.d"
 k8s_cni_plugin_version: "0.7.5"
 # SHA512 checksum (see https://github.com/containernetworking/plugins/releases)
-k8s_cni_plugin_checksum: "1abfb567c13f87aab94efd6f2c6bb17f3581cbcce87bf8c6216510a92486cb44e6b8701fd3a6cb85273a97981feecbd0c4eb624eab0eca5a005fd85a7d95c284"
+k8s_cni_plugin_checksum: "76b29cc629449723fef45db6a6999b0617e6c9084678a4a3361caf3fc5e935084bc0644e47839b1891395e3cec984f7bfe581dd9455c4991ddeee1c78392e538"
 ```
 
 Dependencies

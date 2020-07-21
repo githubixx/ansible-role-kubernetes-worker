@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+**13.0.0+1.18.5**
+
+- update `k8s_release` to `1.18.5`
+- update `k8s_cni_plugin_version` to `0.8.6`
+
 **12.0.0+1.17.4**
 
 - update `k8s_release` to `1.17.4`
