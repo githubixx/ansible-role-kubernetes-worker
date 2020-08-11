@@ -121,7 +121,7 @@
 
 - name: Download CNI plugins
   get_url:
-    url: "https://github.com/containernetworking/plugins/releases/download/v{{ k8s_cni_plugin_version }}/cni-plugins-amd64-v{{ k8s_cni_plugin_version }}.tgz"
+    url: "https://github.com/containernetworking/plugins/releases/download/v{{ k8s_cni_plugin_version }}/cni-plugins-linux-amd64-v{{ k8s_cni_plugin_version }}.tgz"
     dest: "{{ k8s_worker_download_dir }}/{{ k8s_cni_plugin_version }}.tgz"
     mode: 0640
     checksum: "sha512:{{ k8s_cni_plugin_checksum }}"
@@ -139,8 +139,6 @@
     src: "{{ k8s_worker_download_dir }}/{{ k8s_cni_plugin_version }}.tgz"
     dest: "{{ k8s_cni_bin_dir }}"
     remote_src: yes
-  when:
-    downloaded_cni_plugin_checksum.stat.checksum|default('None') != k8s_cni_plugin_checksum
   notify:
     - restart kubelet
   tags:
