@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+**13.1.0+1.18.6**
+
+- update `k8s_release` to `1.18.6`
+- CNI plugins download location changed
+
 **13.0.1+1.18.5**
 
 - added Ubuntu 20.04 (Focal Fossa) as supported platform
