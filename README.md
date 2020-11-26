@@ -27,7 +27,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 # The directory to store the K8s binaries
 k8s_bin_dir: "/usr/local/bin"
 # K8s release
-k8s_release: "1.18.6"
+k8s_release: "1.18.12"
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
 # normally "wg0" (WireGuard),"peervpn0" (PeerVPN) or "tap0".
@@ -128,9 +128,9 @@ k8s_worker_kubeproxy_conf_yaml: |
 k8s_cni_dir: "/opt/cni"
 k8s_cni_bin_dir: "{{k8s_cni_dir}}/bin"
 k8s_cni_conf_dir: "/etc/cni/net.d"
-k8s_cni_plugin_version: "0.8.6"
+k8s_cni_plugin_version: "0.8.7"
 # SHA512 checksum (see https://github.com/containernetworking/plugins/releases)
-k8s_cni_plugin_checksum: "76b29cc629449723fef45db6a6999b0617e6c9084678a4a3361caf3fc5e935084bc0644e47839b1891395e3cec984f7bfe581dd9455c4991ddeee1c78392e538"
+k8s_cni_plugin_checksum: "8f2cbee3b5f94d59f919054dccfe99a8e3db5473b553d91da8af4763e811138533e05df4dbeab16b3f774852b4184a7994968f5e036a3f531ad1ac4620d10ede"
 ```
 
 Dependencies
