@@ -24,10 +24,13 @@ Role Variables
 ```
 # The directory to store the K8s certificates and other configuration
 k8s_conf_dir: "/var/lib/kubernetes"
+
 # The directory to store the K8s binaries
 k8s_bin_dir: "/usr/local/bin"
+
 # K8s release
-k8s_release: "1.18.12"
+k8s_release: "1.19.4"
+
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
 # normally "wg0" (WireGuard),"peervpn0" (PeerVPN) or "tap0".
@@ -39,6 +42,7 @@ k8s_interface: "tap0"
 # "/home/da_user" then "k8s_ca_conf_directory" will have a value of
 # "/home/da_user/k8s/certs".
 k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
+
 # Directory where kubeconfig for Kubernetes worker nodes and kube-proxy
 # is stored among other configuration files. Same variable expansion
 # rule applies as with "k8s_ca_conf_directory"
