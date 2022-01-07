@@ -206,6 +206,9 @@
   tags:
     - k8s-worker
 
+- name: Flush handlers
+  meta: flush_handlers
+
 - name: Enable kube-proxy
   service:
     name: kube-proxy
