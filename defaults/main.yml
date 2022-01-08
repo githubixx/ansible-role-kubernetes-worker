@@ -78,7 +78,7 @@ k8s_worker_kubelet_conf_yaml: |
   tlsCertFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}.pem"
   tlsPrivateKeyFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}-key.pem"
 
-# Directroy to store kube-proxy configuration
+# Directory to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 
 # kube-proxy settings
