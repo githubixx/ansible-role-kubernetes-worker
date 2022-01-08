@@ -48,13 +48,9 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 k8s_worker_kubelet_settings:
   "config": "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
   "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
-  "container-runtime": "docker"
-  "image-pull-progress-deadline": "2m"
+  "container-runtime": "remote"
+  "container-runtime-endpoint": "unix:///run/containerd/containerd.sock"
   "kubeconfig": "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
-  "network-plugin": "cni"
-  "cni-conf-dir": "{{k8s_cni_conf_dir}}"
-  "cni-bin-dir": "{{k8s_cni_bin_dir}}"
-  "cloud-provider": ""
   "register-node": "true"
 
 # kublet kubeconfig
@@ -104,11 +100,3 @@ k8s_worker_kubeproxy_conf_yaml: |
   iptables:
     masqueradeAll: true
   clusterCIDR: "10.200.0.0/16"
-
-# CNI network plugin settings
-k8s_cni_dir: "/opt/cni"
-k8s_cni_bin_dir: "{{k8s_cni_dir}}/bin"
-k8s_cni_conf_dir: "/etc/cni/net.d"
-k8s_cni_plugin_version: "0.8.7"
-# SHA512 checksum (see https://github.com/containernetworking/plugins/releases)
-k8s_cni_plugin_checksum: "8f2cbee3b5f94d59f919054dccfe99a8e3db5473b553d91da8af4763e811138533e05df4dbeab16b3f774852b4184a7994968f5e036a3f531ad1ac4620d10ede"
