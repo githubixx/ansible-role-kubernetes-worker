@@ -169,14 +169,6 @@
   tags:
     - k8s-worker
 
-- name: Enable Kubelet
-  service:
-    name: kubelet
-    enabled: yes
-    state: started
-  tags:
-    - k8s-worker
-
 - name: Ensure Kubeproxy config directory
   file:
     path: "{{ k8s_worker_kubeproxy_conf_dir }}"
@@ -208,6 +200,14 @@
 
 - name: Flush handlers
   meta: flush_handlers
+
+- name: Enable Kubelet
+  service:
+    name: kubelet
+    enabled: yes
+    state: started
+  tags:
+    - k8s-worker
 
 - name: Enable kube-proxy
   service:
