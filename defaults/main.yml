@@ -77,6 +77,7 @@ k8s_worker_kubelet_conf_yaml: |
   serializeImagePulls: false
   tlsCertFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}.pem"
   tlsPrivateKeyFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}-key.pem"
+  cgroupDriver: "systemd"
 
 # Directory to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
