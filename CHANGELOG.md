@@ -1,5 +1,10 @@
 # Changelog
 
+## 18.0.0+1.22.5
+
+- update `k8s_release` to `1.22.5`
+- default the `cgroupDriver` value in the `KubeletConfiguration` to `systemd` as `kubelet` runs as a `systemd` service. See [configure-cgroup-driver](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/) for more details. Before that the default was `cgroupfs`. Also see [Migrating to the systemd driver](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/#migrating-to-the-systemd-driver)
+
 ## 17.0.0+1.21.8
 
 - **BREAKING**: This role no longer installs `CNI plugins`. So the variables `k8s_cni_dir`, `k8s_cni_bin_dir`, `k8s_cni_conf_dir`, `k8s_cni_plugin_version` and `k8s_cni_plugin_checksum` are no longer relevant and are ignored. Please use Ansible role [containerd](https://galaxy.ansible.com/githubixx/containerd) to install `containerd`, `runc` and `CNI plugins` before installing this role. Also see [Kubernetes: Replace dockershim with containerd and runc](https://www.tauceti.blog/posts/kubernetes-replace-docker-with-containerd-runc/)

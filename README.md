@@ -31,7 +31,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 k8s_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_release: "1.21.8"
+k8s_release: "1.22.5"
 
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -79,7 +79,7 @@ k8s_worker_kubelet_settings:
   "kubeconfig": "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
   "register-node": "true"
 
-# kublet kubeconfig
+# kubelet kubeconfig
 k8s_worker_kubelet_conf_yaml: |
   kind: KubeletConfiguration
   apiVersion: kubelet.config.k8s.io/v1beta1
@@ -103,6 +103,7 @@ k8s_worker_kubelet_conf_yaml: |
   serializeImagePulls: false
   tlsCertFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}.pem"
   tlsPrivateKeyFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}-key.pem"
+  cgroupDriver: "systemd"
 
 # Directory to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
