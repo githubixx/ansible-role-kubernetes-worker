@@ -70,7 +70,13 @@ k8s_worker_download_dir: "/opt/tmp"
 k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 
 # kubelet settings
-# kubelet settings
+#
+# If you want to enable the use of "RuntimeDefault" as the default seccomp
+# profile for all workloads add these settings:
+#
+# "feature-gates": "SeccompDefault=true"
+# "seccomp-default": ""
+#
 k8s_worker_kubelet_settings:
   "config": "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
   "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
