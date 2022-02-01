@@ -1,5 +1,10 @@
 # Changelog
 
+## 19.0.0+1.23.3
+
+- update `k8s_release` to `1.23.3`
+- this role now requires Ansible >= 2.9
+
 ## 18.0.1+1.22.6
 
 - update `k8s_release` to `1.22.6`

@@ -204,7 +204,7 @@
 - name: Enable Kubelet
   service:
     name: kubelet
-    enabled: yes
+    enabled: true
     state: started
   tags:
     - k8s-worker
@@ -212,7 +212,7 @@
 - name: Enable kube-proxy
   service:
     name: kube-proxy
-    enabled: yes
+    enabled: true
     state: started
   tags:
     - k8s-worker
