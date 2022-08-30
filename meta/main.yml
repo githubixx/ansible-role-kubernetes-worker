@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Robert Wimmer
   description: Installs Kubernetes worker.
