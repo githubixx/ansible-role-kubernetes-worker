@@ -107,8 +107,8 @@
   with_items:
     - "{{ k8s_worker_binaries }}"
   notify:
-    - restart kube-proxy
-    - restart kubelet
+    - Restart kube-proxy
+    - Restart kubelet
   tags:
     - k8s-worker
 
@@ -164,8 +164,8 @@
     group: root
     mode: 0644
   notify:
-    - reload systemd
-    - restart kubelet
+    - Reload systemd
+    - Restart kubelet
   tags:
     - k8s-worker
 
@@ -193,8 +193,8 @@
     group: root
     mode: 0644
   notify:
-    - reload systemd
-    - restart kube-proxy
+    - Reload systemd
+    - Restart kube-proxy
   tags:
     - k8s-worker
 
