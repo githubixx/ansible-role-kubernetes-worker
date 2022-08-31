@@ -1,6 +1,6 @@
 ---
 - name: Remove swapfile from /etc/fstab
-  mount:
+  ansible.builtin.mount:
     name: swap
     fstype: swap
     state: absent
@@ -8,13 +8,13 @@
     - k8s-worker
 
 - name: Disable swap
-  command: swapoff -a
+  ansible.builtin.command: swapoff -a
   when: ansible_swaptotal_mb > 0
   tags:
     - k8s-worker
 
 - name: Create Kubernetes config directory
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_conf_dir }}"
     state: directory
     mode: 0700
@@ -24,7 +24,7 @@
     - k8s-worker
 
 - name: Ensure Kubelet config directory
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_worker_kubelet_conf_dir }}"
     state: directory
     mode: 0700
@@ -34,7 +34,7 @@
     - k8s-worker
 
 - name: Ensure Kubeproxy config directory
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_worker_kubeproxy_conf_dir }}"
     state: directory
     mode: 0700
@@ -44,7 +44,7 @@
     - k8s-worker
 
 - name: Ensure download directory (used to store archives)
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_worker_download_dir }}"
     state: directory
     mode: 0750
@@ -52,7 +52,7 @@
     - k8s-worker
 
 - name: Install some network packages
-  apt:
+  ansible.builtin.apt:
     state: present
     pkg: ['ebtables', 'ethtool', 'ipset', 'conntrack', 'iptables', 'iptstate', 'netstat-nat', 'socat', 'netbase']
   tags:
@@ -60,7 +60,7 @@
   when: ansible_os_family == "Debian"
 
 - name: Install some network packages
-  yum:
+  ansible.builtin.yum:
     state: present
     name: ['ebtables', 'ethtool', 'ipset', 'conntrack', 'iptables', 'iptstate', 'net-tools']
   tags:
@@ -68,7 +68,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: Copy worker certificates (part 1)
-  copy:
+  ansible.builtin.copy:
     src: "{{ k8s_ca_conf_directory }}/{{ item }}"
     dest: "{{ k8s_conf_dir }}/{{ item }}"
     mode: 0640
@@ -80,7 +80,7 @@
     - k8s-worker
 
 - name: Copy worker certificates (part 2)
-  copy:
+  ansible.builtin.copy:
     src: "{{ k8s_ca_conf_directory }}/cert-{{ inventory_hostname }}.pem"
     dest: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}.pem"
     mode: 0640
@@ -90,7 +90,7 @@
     - k8s-worker
 
 - name: Copy worker certificates (part 3)
-  copy:
+  ansible.builtin.copy:
     src: "{{ k8s_ca_conf_directory }}/cert-{{ inventory_hostname }}-key.pem"
     dest: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}-key.pem"
     mode: 0640
@@ -100,7 +100,7 @@
     - k8s-worker
 
 - name: Downloading official Kubernetes worker binaries
-  get_url:
+  ansible.builtin.get_url:
     url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_release }}/bin/linux/amd64/{{ item }}"
     dest: "{{ k8s_bin_dir }}"
     mode: 0755
@@ -113,7 +113,7 @@
     - k8s-worker
 
 - name: Create kubelet kubeconfig
-  template:
+  ansible.builtin.template:
     src: "{{ k8s_config_directory }}/{{ inventory_hostname }}.kubeconfig"
     dest: "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
     owner: root
@@ -123,7 +123,7 @@
     - k8s-worker
 
 - name: Create kubeproxy kubeconfig
-  template:
+  ansible.builtin.template:
     src: "{{ k8s_config_directory }}/kube-proxy.kubeconfig"
     dest: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
     owner: root
@@ -133,7 +133,7 @@
     - k8s-worker
 
 - name: Create kubelet-config.yaml
-  copy:
+  ansible.builtin.copy:
     content: "{{ k8s_worker_kubelet_conf_yaml }}"
     dest: "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
     mode: 0600
@@ -142,7 +142,7 @@
     - kubelet-config-yaml
 
 - name: Create kubeproxy-config.yaml
-  copy:
+  ansible.builtin.copy:
     content: "{{ k8s_worker_kubeproxy_conf_yaml }}"
     dest: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeproxy-config.yaml"
     mode: 0600
@@ -151,13 +151,13 @@
     - kubeproxy-config-yaml
 
 - name: Combine k8s_worker_kubelet_settings and k8s_worker_kubelet_settings_user (if defined)
-  set_fact:
-    k8s_worker_kubelet_settings: "{{ k8s_worker_kubelet_settings | combine(k8s_worker_kubelet_settings_user|default({})) }}"
+  ansible.builtin.set_fact:
+    k8s_worker_kubelet_settings: "{{ k8s_worker_kubelet_settings | combine(k8s_worker_kubelet_settings_user | default({})) }}"
   tags:
     - k8s-worker
 
 - name: Create kubelet.service systemd file
-  template:
+  ansible.builtin.template:
     src: etc/systemd/system/kubelet.service.j2
     dest: /etc/systemd/system/kubelet.service
     owner: root
@@ -170,7 +170,7 @@
     - k8s-worker
 
 - name: Ensure Kubeproxy config directory
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_worker_kubeproxy_conf_dir }}"
     state: directory
     mode: 0700
@@ -180,13 +180,13 @@
     - k8s-worker
 
 - name: Combine k8s_worker_kubeproxy_settings and k8s_worker_kubeproxy_settings_user (if defined)
-  set_fact:
-    k8s_worker_kubeproxy_settings: "{{ k8s_worker_kubeproxy_settings | combine(k8s_worker_kubeproxy_settings_user|default({})) }}"
+  ansible.builtin.set_fact:
+    k8s_worker_kubeproxy_settings: "{{ k8s_worker_kubeproxy_settings | combine(k8s_worker_kubeproxy_settings_user | default({})) }}"
   tags:
     - k8s-worker
 
 - name: Create kube-proxy.service systemd file
-  template:
+  ansible.builtin.template:
     src: etc/systemd/system/kube-proxy.service.j2
     dest: /etc/systemd/system/kube-proxy.service
     owner: root
@@ -199,10 +199,10 @@
     - k8s-worker
 
 - name: Flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Enable Kubelet
-  service:
+  ansible.builtin.service:
     name: kubelet
     enabled: true
     state: started
@@ -210,7 +210,7 @@
     - k8s-worker
 
 - name: Enable kube-proxy
-  service:
+  ansible.builtin.service:
     name: kube-proxy
     enabled: true
     state: started
