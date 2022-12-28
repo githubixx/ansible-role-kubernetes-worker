@@ -6,7 +6,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 k8s_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_release: "1.24.4"
+k8s_release: "1.24.9"
 
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -52,7 +52,7 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 # "feature-gates": "SeccompDefault=true"
 # "seccomp-default": ""
 #
-# These settings are Alpha but may be worth adding. Also see:
+# These settings are Beta but may be worth adding. Also see:
 # https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads
 #
 k8s_worker_kubelet_settings:
