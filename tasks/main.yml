@@ -1,6 +1,6 @@
 ---
 - name: Remove swapfile from /etc/fstab
-  ansible.builtin.mount:
+  ansible.posix.mount:
     name: swap
     fstype: swap
     state: absent
