@@ -1,5 +1,9 @@
 # Changelog
 
+## 21.1.0+1.25.9
+
+update `k8s_release` to `1.25.9`
+
 ## 21.0.0+1.25.5
 
 update `k8s_release` to `1.25.5`
