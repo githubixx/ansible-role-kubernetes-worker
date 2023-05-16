@@ -58,7 +58,6 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 k8s_worker_kubelet_settings:
   "config": "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
   "node-ip": "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
-  "container-runtime": "remote"
   "container-runtime-endpoint": "unix:///run/containerd/containerd.sock"
   "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
   "register-node": "true"
