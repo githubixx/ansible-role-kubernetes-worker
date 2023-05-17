@@ -86,7 +86,6 @@ k8s_worker_kubelet_settings:
   "node-ip": "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
   "container-runtime-endpoint": "unix:///run/containerd/containerd.sock"
   "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
-  "register-node": "true"
 
 # kubelet kubeconfig
 k8s_worker_kubelet_conf_yaml: |
@@ -113,6 +112,7 @@ k8s_worker_kubelet_conf_yaml: |
   tlsCertFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}.pem"
   tlsPrivateKeyFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}-key.pem"
   cgroupDriver: "systemd"
+  registerNode: true
 
 # Directory to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
