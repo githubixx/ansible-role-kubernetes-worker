@@ -6,7 +6,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 k8s_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_release: "1.25.5"
+k8s_release: "1.25.9"
 
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -47,21 +47,17 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 # kubelet settings
 #
 # If you want to enable the use of "RuntimeDefault" as the default seccomp
-# profile for all workloads add these settings:
+# profile for all workloads add these settings to "k8s_worker_kubelet_settings":
 #
-# "feature-gates": "SeccompDefault=true"
 # "seccomp-default": ""
 #
-# These settings are Beta but may be worth adding. Also see:
+# Also see:
 # https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads
-#
 k8s_worker_kubelet_settings:
   "config": "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
   "node-ip": "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
-  "container-runtime": "remote"
   "container-runtime-endpoint": "unix:///run/containerd/containerd.sock"
   "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
-  "register-node": "true"
 
 # kubelet kubeconfig
 k8s_worker_kubelet_conf_yaml: |
@@ -88,6 +84,7 @@ k8s_worker_kubelet_conf_yaml: |
   tlsCertFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}.pem"
   tlsPrivateKeyFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}-key.pem"
   cgroupDriver: "systemd"
+  registerNode: true
 
 # Directory to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"

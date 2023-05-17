@@ -1,12 +1,21 @@
 # Changelog
 
+## 21.1.0+1.25.9
+
+- update `k8s_release` to `1.25.9`
+- move kubelet parameter `--register-node` to `kubelet.conf` (using the option as parameter is deprected)
+- `tasks/main.yml`: add `changed_when: false` to `Disable swap` task
+- `tasks/main.yml`: use `ansible.posix.mount` instead of `ansible.builtin.mount`
+- `kubelet`: remove `--container-runtime` (Flag `--container-runtime` has been deprecated, will be removed in 1.27 as the only valid value is `remote`)
+- `kubelet`: update information about `seccomp-default` / remove `SeccompDefault` feature gate (now beta and enabled by default)
+
 ## 21.0.0+1.25.5
 
-update `k8s_release` to `1.25.5`
+- update `k8s_release` to `1.25.5`
 
 ## 20.0.1+1.24.9
 
-update `k8s_release` to `1.24.9`
+- update `k8s_release` to `1.24.9`
 
 ## 20.0.0+1.24.4
 

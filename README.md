@@ -24,6 +24,7 @@ Role Variables
 --------------
 
 ```yaml
+---
 # The directory to store the K8s certificates and other configuration
 k8s_conf_dir: "/var/lib/kubernetes"
 
@@ -31,7 +32,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 k8s_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_release: "1.25.5"
+k8s_release: "1.25.9"
 
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -70,61 +71,61 @@ k8s_worker_download_dir: "/opt/tmp"
 k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 
 # kubelet settings
-#
+# 
 # If you want to enable the use of "RuntimeDefault" as the default seccomp
-# profile for all workloads add these settings:
-#
-# "feature-gates": "SeccompDefault=true"
+# profile for all workloads add these settings to "k8s_worker_kubelet_settings":
+# 
 # "seccomp-default": ""
 #
+# Also see:
+# https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads
 k8s_worker_kubelet_settings:
-  "config": "{{k8s_worker_kubelet_conf_dir}}/kubelet-config.yaml"
-  "node-ip": "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
-  "container-runtime": "remote"
+  "config": "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
+  "node-ip": "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
   "container-runtime-endpoint": "unix:///run/containerd/containerd.sock"
-  "kubeconfig": "{{k8s_worker_kubelet_conf_dir}}/kubeconfig"
-  "register-node": "true"
+  "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
 
 # kubelet kubeconfig
 k8s_worker_kubelet_conf_yaml: |
   kind: KubeletConfiguration
   apiVersion: kubelet.config.k8s.io/v1beta1
-  address: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}
+  address: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}
   authentication:
     anonymous:
       enabled: false
     webhook:
       enabled: true
     x509:
-      clientCAFile: "{{k8s_conf_dir}}/ca-k8s-apiserver.pem"
+      clientCAFile: "{{ k8s_conf_dir }}/ca-k8s-apiserver.pem"
   authorization:
     mode: Webhook
   clusterDomain: "cluster.local"
   clusterDNS:
     - "10.32.0.254"
   failSwapOn: true
-  healthzBindAddress: "{{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}"
+  healthzBindAddress: "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
   healthzPort: 10248
   runtimeRequestTimeout: "15m"
   serializeImagePulls: false
-  tlsCertFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}.pem"
-  tlsPrivateKeyFile: "{{k8s_conf_dir}}/cert-{{inventory_hostname}}-key.pem"
+  tlsCertFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}.pem"
+  tlsPrivateKeyFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}-key.pem"
   cgroupDriver: "systemd"
+  registerNode: true
 
 # Directory to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
 
 # kube-proxy settings
 k8s_worker_kubeproxy_settings:
-  "config": "{{k8s_worker_kubeproxy_conf_dir}}/kubeproxy-config.yaml"
+  "config": "{{ k8s_worker_kubeproxy_conf_dir }}/kubeproxy-config.yaml"
 
 k8s_worker_kubeproxy_conf_yaml: |
   kind: KubeProxyConfiguration
   apiVersion: kubeproxy.config.k8s.io/v1alpha1
-  bindAddress: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}
+  bindAddress: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}
   clientConnection:
-    kubeconfig: "{{k8s_worker_kubeproxy_conf_dir}}/kubeconfig"
-  healthzBindAddress: {{hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address}}:10256
+    kubeconfig: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
+  healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}:10256
   mode: "ipvs"
   ipvs:
     minSyncPeriod: 0s
