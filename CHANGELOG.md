@@ -7,6 +7,7 @@
 - `tasks/main.yml`: add `changed_when: false` to `Disable swap` task
 - `tasks/main.yml`: use `ansible.posix.mount` instead of `ansible.builtin.mount`
 - `kubelet`: remove `--container-runtime` (Flag `--container-runtime` has been deprecated, will be removed in 1.27 as the only valid value is `remote`)
+- `kubelet`: update information about `seccomp-default` / remove `SeccompDefault` feature gate (now beta and enabled by default)
 
 ## 21.0.0+1.25.5
 
