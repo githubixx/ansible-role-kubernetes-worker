@@ -1,5 +1,11 @@
 # Changelog
 
+## 22.0.0+1.26.4
+
+- update `k8s_release` to `1.26.4`
+- add Molecule test
+- add Github workflow
+
 ## 21.1.0+1.25.9
 
 - update `k8s_release` to `1.25.9`
