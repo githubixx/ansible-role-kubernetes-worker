@@ -2,8 +2,10 @@
 [Unit]
 Description=Kubernetes Kubelet
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=network-online.target
 After=containerd.service
 Requires=containerd.service
+Wants=network-online.target
 
 [Service]
 ExecStart={{k8s_bin_dir}}/kubelet \
