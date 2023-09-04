@@ -32,7 +32,7 @@ k8s_conf_dir: "/var/lib/kubernetes"
 k8s_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_release: "1.26.8"
+k8s_release: "1.27.5"
 
 # The interface on which the K8s services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -139,7 +139,7 @@ k8s_worker_kubeproxy_conf_yaml: |
 Dependencies
 ------------
 
-- [kubernetes-controller](https://galaxy.ansible.com/githubixx/kubernetes-controller/)
+- [kubernetes_controller](https://galaxy.ansible.com/githubixx/kubernetes_controller/)
 - [containerd](https://galaxy.ansible.com/githubixx/containerd)
 
 Example Playbook
@@ -148,7 +148,7 @@ Example Playbook
 ```yaml
 - hosts: k8s_worker
   roles:
-    - githubixx.kubernetes-worker
+    - githubixx.kubernetes_worker
 ```
 
 License
