@@ -139,7 +139,7 @@ k8s_worker_kubeproxy_conf_yaml: |
 Dependencies
 ------------
 
-- [kubernetes-controller](https://galaxy.ansible.com/githubixx/kubernetes-controller/)
+- [kubernetes_controller](https://galaxy.ansible.com/githubixx/kubernetes_controller/)
 - [containerd](https://galaxy.ansible.com/githubixx/containerd)
 
 Example Playbook

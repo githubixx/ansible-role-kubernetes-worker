@@ -3,6 +3,7 @@
 ## 23.0.0+1.27.5
 
 - **BREAKING**: `meta/main.yml`: change role_name from `kubernetes-worker` to `kubernetes_worker`. This is a requirement since quite some time for Ansible Galaxy. But the requirement was introduced after this role already existed for quite some time. So please update the name of the role in your playbook accordingly!
+- rename `kubernetes-controller` to `kubernetes_controller` as role name changed (requirement as before)
 - update `k8s_release` to `1.27.5`
 - moved `container-runtime-endpoint` setting from `k8s_worker_kubelet_settings` variable (`/etc/systemd/system/kubelet.service`) to `k8s_worker_kubelet_conf_yaml` variable (`kubelet-config.yaml`). The name changed from `container-runtime-endpoint` to `containerRuntimeEndpoint`. For more information see pull request [kubelet: migrate container runtime endpoint flag to config](https://github.com/kubernetes/kubernetes/pull/112136).
 
