@@ -7,6 +7,7 @@
 - update `k8s_release` to `1.27.5`
 - `meta/main.yml`: remove Ubuntu 18.04 as supported OS (reached EOL)
 - moved `container-runtime-endpoint` setting from `k8s_worker_kubelet_settings` variable (`/etc/systemd/system/kubelet.service`) to `k8s_worker_kubelet_conf_yaml` variable (`kubelet-config.yaml`). The name changed from `container-runtime-endpoint` to `containerRuntimeEndpoint`. For more information see pull request [kubelet: migrate container runtime endpoint flag to config](https://github.com/kubernetes/kubernetes/pull/112136).
+- remove `Install some network packages` task for Red Hat based OSes (was actually never officially supported)
 
 ## 22.0.1+1.26.8
 
