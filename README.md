@@ -148,7 +148,7 @@ Example Playbook
 ```yaml
 - hosts: k8s_worker
   roles:
-    - githubixx.kubernetes-worker
+    - githubixx.kubernetes_worker
 ```
 
 License

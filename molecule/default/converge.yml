@@ -11,7 +11,7 @@
       when:
         - k8s_worker_setup_networking is not defined
       ansible.builtin.include_role:
-        name: githubixx.kubernetes-worker
+        name: githubixx.kubernetes_worker
 
 - name: Setup Cilium
   hosts: k8s_worker
