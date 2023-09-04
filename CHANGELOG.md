@@ -3,6 +3,7 @@
 ## 23.0.0+1.27.5
 
 - update `k8s_release` to `1.27.5`
+- moved `container-runtime-endpoint` setting from `k8s_worker_kubelet_settings` variable (`/etc/systemd/system/kubelet.service`) to `k8s_worker_kubelet_conf_yaml` variable (`kubelet-config.yaml`). The name changed from `container-runtime-endpoint` to `containerRuntimeEndpoint`. For more information see pull request [kubelet: migrate container runtime endpoint flag to config](https://github.com/kubernetes/kubernetes/pull/112136).
 
 ## 22.0.1+1.26.8
 
