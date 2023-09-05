@@ -135,7 +135,7 @@
   tasks:
     - name: Include kubernetes_controller role
       ansible.builtin.include_role:
-        name: githubixx.kuberneter_controller
+        name: githubixx.kubernetes_controller
 
 - name: Setup containerd
   hosts: k8s_worker
