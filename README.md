@@ -15,6 +15,12 @@ This playbook expects that you already have rolled out the Kubernetes controller
 
 You also need [containerd](https://galaxy.ansible.com/githubixx/containerd) installed. To enable Kubernetes `Pods` to communicate between different hosts it makes sense to install [Cilium](https://galaxy.ansible.com/githubixx/cilium_kubernetes) later once the worker nodes are running e.g. Of course `Calico`, `WeaveNet`, `kube-router` or [flannel](https://galaxy.ansible.com/githubixx/flanneld) or other Kubernetes network solutions are valid options.
 
+Supported OS
+------------
+
+- Ubuntu 20.04 (Focal Fossa)
+- Ubuntu 22.04 (Jammy Jellyfish)
+
 Changelog
 ---------
 
@@ -82,7 +88,6 @@ k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
 k8s_worker_kubelet_settings:
   "config": "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
   "node-ip": "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
-  "container-runtime-endpoint": "unix:///run/containerd/containerd.sock"
   "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
 
 # kubelet kubeconfig
@@ -111,6 +116,7 @@ k8s_worker_kubelet_conf_yaml: |
   tlsPrivateKeyFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}-key.pem"
   cgroupDriver: "systemd"
   registerNode: true
+  containerRuntimeEndpoint: "unix:///run/containerd/containerd.sock"
 
 # Directory to store kube-proxy configuration
 k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
@@ -149,6 +155,35 @@ Example Playbook
 - hosts: k8s_worker
   roles:
     - githubixx.kubernetes_worker
+```
+
+Testing
+-------
+
+This role has a small test setup that is created using [Molecule](https://github.com/ansible-community/molecule), libvirt (vagrant-libvirt) and QEMU/KVM. Please see my blog post [Testing Ansible roles with Molecule, libvirt (vagrant-libvirt) and QEMU/KVM](https://www.tauceti.blog/posts/testing-ansible-roles-with-molecule-libvirt-vagrant-qemu-kvm/) how to setup. The test configuration is [here](https://github.com/githubixx/ansible-role-kubernetes-worker/tree/master/molecule/default).
+
+Afterwards Molecule can be executed. This will setup a few virtual machines (VM) with supported Ubuntu OS and installs an Kubernetes cluster:
+
+```bash
+molecule converge
+```
+
+At this time the cluster isn't fully functional as a network plugin is missing e.g. So Pod to Pod communication between two different nodes isn't possible yet. To fix this the following command can be used to install [Cilium](https://github.com/githubixx/ansible-role-cilium-kubernetes) for all Kubernetes networking needs and [CoreDNS](https://github.com/githubixx/ansible-kubernetes-playbooks/tree/master/coredns) for Kubernetes DNS stuff:
+
+```bash
+molecule converge -- --extra-vars k8s_worker_setup_networking=install
+```
+
+A small verification step is also included:
+
+```bash
+molecule verify
+```
+
+To clean up run
+
+```bash
+molecule destroy
 ```
 
 License

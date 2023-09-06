@@ -1,5 +1,10 @@
 # Changelog
 
+## 23.1.0+1.27.5
+
+- add support for Ubuntu 22.04
+- `molecule/default/group_vars/all.yml`: Removed `container-runtime-endpoint` setting from `k8s_worker_kubelet_settings` (/etc/systemd/system/kubelet.service). It was moved to `k8s_worker_kubelet_conf_yaml` (kubelet-config.yaml)
+
 ## 23.0.0+1.27.5
 
 - **BREAKING**: `meta/main.yml`: change role_name from `kubernetes-worker` to `kubernetes_worker`. This is a requirement since quite some time for Ansible Galaxy. But the requirement was introduced after this role already existed for quite some time. So please update the name of the role in your playbook accordingly!

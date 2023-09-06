@@ -24,7 +24,7 @@
       vars:
         query: "length(resources)"
 
-    - name: There should be four namespaces
+    - name: There should be four namespaces at least
       ansible.builtin.assert:
         that:
           - k8s__namespaces_count|int >= 4
