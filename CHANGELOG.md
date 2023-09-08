@@ -1,5 +1,9 @@
 # Changelog
 
+## 23.1.1+1.27.5
+
+- rename `githubixx.kubernetes-ca` to `githubixx.kubernetes_ca`
+
 ## 23.1.0+1.27.5
 
 - add support for Ubuntu 22.04
