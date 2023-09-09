@@ -1,5 +1,9 @@
 # Changelog
 
+## 23.1.2+1.27.5
+
+- rename `githubixx.harden-linux` to `githubixx.harden_linux`
+
 ## 23.1.1+1.27.5
 
 - rename `githubixx.kubernetes-ca` to `githubixx.kubernetes_ca`
