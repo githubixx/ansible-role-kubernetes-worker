@@ -11,7 +11,7 @@ I tag every release and try to stay with [semantic versioning](http://semver.org
 Requirements
 ------------
 
-This playbook expects that you already have rolled out the Kubernetes controller components (see [kubernetes-controller](https://galaxy.ansible.com/githubixx/kubernetes-controller/)) and [Kubernetes the not so hard way with Ansible - Control plane](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-control-plane/).
+This playbook expects that you already have rolled out the Kubernetes controller components (see [kubernetes-controller](https://galaxy.ansible.com/githubixx/kubernetes_controller/)) and [Kubernetes the not so hard way with Ansible - Control plane](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-control-plane/).
 
 You also need [containerd](https://galaxy.ansible.com/githubixx/containerd) installed. To enable Kubernetes `Pods` to communicate between different hosts it makes sense to install [Cilium](https://galaxy.ansible.com/githubixx/cilium_kubernetes) later once the worker nodes are running e.g. Of course `Calico`, `WeaveNet`, `kube-router` or [flannel](https://galaxy.ansible.com/githubixx/flanneld) or other Kubernetes network solutions are valid options.
 
