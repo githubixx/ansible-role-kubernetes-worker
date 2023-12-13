@@ -14,13 +14,23 @@
   tags:
     - k8s-worker
 
-- name: Create Kubernetes config directory
+- name: Create worker nodes configuration base directory
   ansible.builtin.file:
-    path: "{{ k8s_conf_dir }}"
+    path: "{{ k8s_worker_conf_dir }}"
     state: directory
-    mode: 0700
-    owner: root
-    group: root
+    mode: "0750"
+    owner: "root"
+    group: "root"
+  tags:
+    - k8s-worker
+
+- name: Create PKI directory
+  ansible.builtin.file:
+    path: "{{ k8s_worker_pki_dir }}"
+    state: directory
+    mode: "0750"
+    owner: "root"
+    group: "root"
   tags:
     - k8s-worker
 
@@ -28,9 +38,9 @@
   ansible.builtin.file:
     path: "{{ k8s_worker_kubelet_conf_dir }}"
     state: directory
-    mode: 0700
-    owner: root
-    group: root
+    mode: "0700"
+    owner: "root"
+    group: "root"
   tags:
     - k8s-worker
 
@@ -38,34 +48,29 @@
   ansible.builtin.file:
     path: "{{ k8s_worker_kubeproxy_conf_dir }}"
     state: directory
-    mode: 0700
-    owner: root
-    group: root
+    mode: "0700"
+    owner: "root"
+    group: "root"
   tags:
     - k8s-worker
 
-- name: Ensure download directory (used to store archives)
-  ansible.builtin.file:
-    path: "{{ k8s_worker_download_dir }}"
-    state: directory
-    mode: 0750
-  tags:
-    - k8s-worker
-
-- name: Install some network packages
+- name: Install required OS packages
   ansible.builtin.apt:
     state: present
-    pkg: ['ebtables', 'ethtool', 'ipset', 'conntrack', 'iptables', 'iptstate', 'netstat-nat', 'socat', 'netbase']
+    pkg: "{{ package }}"
+  loop: "{{ k8s_worker_os_packages }}"
+  loop_control:
+    loop_var: "package"
   tags:
     - k8s-worker
 
 - name: Copy worker certificates (part 1)
   ansible.builtin.copy:
     src: "{{ k8s_ca_conf_directory }}/{{ item }}"
-    dest: "{{ k8s_conf_dir }}/{{ item }}"
-    mode: 0640
-    owner: root
-    group: root
+    dest: "{{ k8s_worker_pki_dir }}/{{ item }}"
+    mode: "0640"
+    owner: "root"
+    group: "root"
   with_items:
     - "{{ k8s_worker_certificates }}"
   tags:
@@ -74,28 +79,31 @@
 - name: Copy worker certificates (part 2)
   ansible.builtin.copy:
     src: "{{ k8s_ca_conf_directory }}/cert-{{ inventory_hostname }}.pem"
-    dest: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}.pem"
-    mode: 0640
-    owner: root
-    group: root
+    dest: "{{ k8s_worker_pki_dir }}/cert-{{ inventory_hostname }}.pem"
+    mode: "0640"
+    owner: "root"
+    group: "root"
   tags:
     - k8s-worker
 
 - name: Copy worker certificates (part 3)
   ansible.builtin.copy:
     src: "{{ k8s_ca_conf_directory }}/cert-{{ inventory_hostname }}-key.pem"
-    dest: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}-key.pem"
-    mode: 0640
-    owner: root
-    group: root
+    dest: "{{ k8s_worker_pki_dir }}/cert-{{ inventory_hostname }}-key.pem"
+    mode: "0640"
+    owner: "root"
+    group: "root"
   tags:
     - k8s-worker
 
 - name: Downloading official Kubernetes worker binaries
   ansible.builtin.get_url:
-    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_release }}/bin/linux/amd64/{{ item }}"
-    dest: "{{ k8s_bin_dir }}"
-    mode: 0755
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_worker_release }}/bin/linux/amd64/{{ item }}"
+    checksum: "sha512:https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_worker_release }}/bin/linux/amd64/{{ item }}.sha512"
+    dest: "{{ k8s_worker_bin_dir }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
   with_items:
     - "{{ k8s_worker_binaries }}"
   notify:
@@ -105,30 +113,25 @@
     - k8s-worker
 
 - name: Create kubelet kubeconfig
-  ansible.builtin.template:
-    src: "{{ k8s_config_directory }}/{{ inventory_hostname }}.kubeconfig"
-    dest: "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
-    owner: root
-    group: root
-    mode: 0644
-  tags:
-    - k8s-worker
+  ansible.builtin.include_tasks:
+    file: "authconfig/kubelet.yml"
+    apply:
+      tags:
+        - k8s-worker
+        - k8s-auth-config-kubelet
 
-- name: Create kubeproxy kubeconfig
-  ansible.builtin.template:
-    src: "{{ k8s_config_directory }}/kube-proxy.kubeconfig"
-    dest: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
-    owner: root
-    group: root
-    mode: 0644
-  tags:
-    - k8s-worker
+- name: Create kube-proxy kubeconfig
+  ansible.builtin.include_tasks:
+    file: "authconfig/kube-proxy.yml"
+    apply:
+      tags:
+        - k8s-worker
 
 - name: Create kubelet-config.yaml
   ansible.builtin.copy:
     content: "{{ k8s_worker_kubelet_conf_yaml }}"
     dest: "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
-    mode: 0600
+    mode: "0600"
   tags:
     - k8s-worker
     - kubelet-config-yaml
@@ -137,7 +140,7 @@
   ansible.builtin.copy:
     content: "{{ k8s_worker_kubeproxy_conf_yaml }}"
     dest: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeproxy-config.yaml"
-    mode: 0600
+    mode: "0600"
   tags:
     - k8s-worker
     - kubeproxy-config-yaml
@@ -152,9 +155,9 @@
   ansible.builtin.template:
     src: etc/systemd/system/kubelet.service.j2
     dest: /etc/systemd/system/kubelet.service
-    owner: root
-    group: root
-    mode: 0644
+    owner: "root"
+    group: "root"
+    mode: "0644"
   notify:
     - Reload systemd
     - Restart kubelet
@@ -164,10 +167,10 @@
 - name: Ensure Kubeproxy config directory
   ansible.builtin.file:
     path: "{{ k8s_worker_kubeproxy_conf_dir }}"
-    state: directory
-    mode: 0700
-    owner: root
-    group: root
+    state: "directory"
+    mode: "0700"
+    owner: "root"
+    group: "root"
   tags:
     - k8s-worker
 
@@ -179,11 +182,11 @@
 
 - name: Create kube-proxy.service systemd file
   ansible.builtin.template:
-    src: etc/systemd/system/kube-proxy.service.j2
-    dest: /etc/systemd/system/kube-proxy.service
-    owner: root
-    group: root
-    mode: 0644
+    src: "etc/systemd/system/kube-proxy.service.j2"
+    dest: "/etc/systemd/system/kube-proxy.service"
+    owner: "root"
+    group: "root"
+    mode: "0644"
   notify:
     - Reload systemd
     - Restart kube-proxy

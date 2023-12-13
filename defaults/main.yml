@@ -1,17 +1,39 @@
 ---
-# The directory to store the K8s certificates and other configuration
-k8s_conf_dir: "/var/lib/kubernetes"
+# The base directory for Kubernetes configuration and certificate files for
+# everything worker nodes related. After the playbook is done this directory
+# contains various sub-folders.
+k8s_worker_conf_dir: "/etc/kubernetes/worker"
 
-# The directory to store the K8s binaries
-k8s_bin_dir: "/usr/local/bin"
+# All certificate files (Private Key Infrastructure related) specified in
+# "k8s_worker_certificates" (see "vars/main.yml") will be stored here.
+# Owner and group of this new directory will be "root". File permissions
+# will be "0640".
+k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
+
+# The directory to store the Kubernetes binaries (see "k8s_worker_binaries"
+# variable in "vars/main.yml"). Owner and group of this new directory
+# will be "root" in both cases. Permissions for this directory will be "0755".
+#
+# NOTE: The default directory "/usr/local/bin" normally already exists on every
+# Linux installation with the owner, group and permissions mentioned above. If
+# your current settings are different consider a different directory. But make sure
+# that the new directory is included in your "$PATH" variable value.
+k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_release: "1.27.5"
+k8s_worker_release: "1.27.8"
 
-# The interface on which the K8s services should listen on. As all cluster
+# The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
 # normally "wg0" (WireGuard),"peervpn0" (PeerVPN) or "tap0".
-k8s_interface: "tap0"
+#
+# The network interface on which the Kubernetes worker services should
+# listen on. That is:
+#
+# - kube-proxy
+# - kubelet
+#
+k8s_interface: "eth0"
 
 # The directory from where to copy the K8s certificates. By default this
 # will expand to user's LOCAL $HOME (the user that run's "ansible-playbook ..."
@@ -20,29 +42,49 @@ k8s_interface: "tap0"
 # "/home/da_user/k8s/certs".
 k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
 
-# Directory where kubeconfig for Kubernetes worker nodes and kube-proxy
-# is stored among other configuration files. Same variable expansion
-# rule applies as with "k8s_ca_conf_directory"
-k8s_config_directory: "{{ '~/k8s/configs' | expanduser }}"
+# The IP address or hostname of the Kubernetes API endpoint. This variable
+# is used by "kube-proxy" and "kubelet" to connect to the "kube-apiserver"
+# (Kubernetes API server).
+#
+# By default the first host in the Ansible group "k8s_controller" is
+# specified here. NOTE: This setting is not fault tolerant! That means
+# if the first host in the Ansible group "k8s_controller" is down
+# the worker node and its workload continue working but the worker
+# node doesn't receive any updates from Kubernetes API server.
+#
+# If you have a loadbalancer that distributes traffic between all
+# Kubernetes API servers it should be specified here (either its IP
+# address or the DNS name). But you need to make sure that the IP
+# address or the DNS name you want to use here is included in the
+# Kubernetes API server TLS certificate (see "k8s_apiserver_cert_hosts"
+# variable of https://github.com/githubixx/ansible-role-kubernetes-ca
+# role). If it's not specified you'll get certificate errors in the
+# logs of the services mentioned above.
+k8s_worker_api_endpoint_host: "{% set controller_host = groups['k8s_controller'][0] %}{{ hostvars[controller_host]['ansible_' + hostvars[controller_host]['k8s_interface']].ipv4.address }}"
 
-# K8s worker binaries to download
-k8s_worker_binaries:
-  - kube-proxy
-  - kubelet
-  - kubectl
+# As above just for the port. It specifies on which port the
+# Kubernetes API servers are listening. Again if there is a loadbalancer
+# in place that distributes the requests to the Kubernetes API servers
+# put the port of the loadbalancer here.
+k8s_worker_api_endpoint_port: "6443"
 
-# Certificate/CA files for API server and kube-proxy
-k8s_worker_certificates:
-  - ca-k8s-apiserver.pem
-  - ca-k8s-apiserver-key.pem
-  - cert-k8s-apiserver.pem
-  - cert-k8s-apiserver-key.pem
-
-# Download directory for archive files
-k8s_worker_download_dir: "/opt/tmp"
+# OS packages needed on a Kubernetes worker node. You can add additional
+# packages at any time. But please be aware if you remove one or more from
+# the default list your worker node might not work as expected or doesn't work
+# at all.
+k8s_worker_os_packages:
+  - ebtables
+  - ethtool
+  - ipset
+  - conntrack
+  - iptables
+  - iptstate
+  - netstat-nat
+  - socat
+  - netbase
 
 # Directory to store kubelet configuration
-k8s_worker_kubelet_conf_dir: "/var/lib/kubelet"
+k8s_worker_kubelet_conf_dir: "{{ k8s_worker_conf_dir }}/kubelet"
 
 # kubelet settings
 #
@@ -69,7 +111,7 @@ k8s_worker_kubelet_conf_yaml: |
     webhook:
       enabled: true
     x509:
-      clientCAFile: "{{ k8s_conf_dir }}/ca-k8s-apiserver.pem"
+      clientCAFile: "{{ k8s_worker_pki_dir }}/ca-k8s-apiserver.pem"
   authorization:
     mode: Webhook
   clusterDomain: "cluster.local"
@@ -80,14 +122,14 @@ k8s_worker_kubelet_conf_yaml: |
   healthzPort: 10248
   runtimeRequestTimeout: "15m"
   serializeImagePulls: false
-  tlsCertFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}.pem"
-  tlsPrivateKeyFile: "{{ k8s_conf_dir }}/cert-{{ inventory_hostname }}-key.pem"
+  tlsCertFile: "{{ k8s_worker_pki_dir }}/cert-{{ inventory_hostname }}.pem"
+  tlsPrivateKeyFile: "{{ k8s_worker_pki_dir }}/cert-{{ inventory_hostname }}-key.pem"
   cgroupDriver: "systemd"
   registerNode: true
   containerRuntimeEndpoint: "unix:///run/containerd/containerd.sock"
 
 # Directory to store kube-proxy configuration
-k8s_worker_kubeproxy_conf_dir: "/var/lib/kube-proxy"
+k8s_worker_kubeproxy_conf_dir: "{{ k8s_worker_conf_dir }}/kube-proxy"
 
 # kube-proxy settings
 k8s_worker_kubeproxy_settings:

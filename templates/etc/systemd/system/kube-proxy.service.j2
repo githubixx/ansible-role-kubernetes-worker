@@ -6,9 +6,9 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart={{k8s_bin_dir}}/kube-proxy \
+ExecStart={{ k8s_worker_bin_dir }}/kube-proxy \
 {%- for setting in k8s_worker_kubeproxy_settings|sort %}
-  --{{setting}}={{k8s_worker_kubeproxy_settings[setting]}} {% if not loop.last %}\{% endif %}
+  --{{ setting }}={{ k8s_worker_kubeproxy_settings[setting] }} {% if not loop.last %}\{% endif %}
 {%- endfor %}
 
 Restart=on-failure

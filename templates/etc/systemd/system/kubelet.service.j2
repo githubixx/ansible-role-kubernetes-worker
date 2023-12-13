@@ -8,9 +8,9 @@ Requires=containerd.service
 Wants=network-online.target
 
 [Service]
-ExecStart={{k8s_bin_dir}}/kubelet \
+ExecStart={{ k8s_worker_bin_dir }}/kubelet \
 {%- for setting in k8s_worker_kubelet_settings|sort %}
-  --{{setting}}{% if k8s_worker_kubelet_settings[setting] != "" %}={{k8s_worker_kubelet_settings[setting]}}{% endif %}{% if not loop.last %} \{% endif %}
+  --{{ setting }}{% if k8s_worker_kubelet_settings[setting] != "" %}={{ k8s_worker_kubelet_settings[setting] }}{% endif %}{% if not loop.last %} \{% endif %}
 {%- endfor %}
 
 Restart=on-failure

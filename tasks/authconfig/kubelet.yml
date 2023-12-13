@@ -1,0 +1,102 @@
+---
+- name: Register checksum of kubelet original kubeconfig
+  ansible.builtin.stat:
+    path: "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
+  register: kubernetes_worker__kubelet_kubeconfig_orig_stat
+
+- name: Generate kubeconfig for kubelet (set-cluster)
+  ansible.builtin.shell: >
+    set -o errexit; \
+    kubectl config set-cluster {{ k8s_config_cluster_name }} \
+      --certificate-authority={{ k8s_worker_pki_dir }}/ca-k8s-apiserver.pem \
+      --embed-certs=true \
+      --server=https://{{ k8s_worker_api_endpoint_host }}:{{ k8s_worker_api_endpoint_port }} \
+      --kubeconfig={{ k8s_worker_kubelet_conf_dir }}/kubeconfig
+  args:
+    executable: /bin/bash
+  register: kubernetes_worker__set_cluster_out
+  changed_when: false
+  failed_when: kubernetes_worker__set_cluster_out.rc != 0
+
+- name: Generate kubeconfig for kubelet (set-cluster) - DEBUG OUTPUT
+  ansible.builtin.debug:
+    msg: "COMMAND:{{ kubernetes_worker__set_cluster_out.cmd }} | OUTPUT: {{ kubernetes_worker__set_cluster_out.stdout }}"
+    verbosity: 2
+
+- name: Generate kubeconfig for kubelet (set-credentials)
+  ansible.builtin.shell: >
+    set -o errexit; \
+    kubectl config set-credentials system:node:{{ ansible_hostname }} \
+      --client-certificate={{ k8s_worker_pki_dir }}/cert-{{ inventory_hostname }}.pem \
+      --client-key={{ k8s_worker_pki_dir }}/cert-{{ inventory_hostname }}-key.pem \
+      --embed-certs=true \
+      --kubeconfig={{ k8s_worker_kubelet_conf_dir }}/kubeconfig
+  args:
+    executable: /bin/bash
+  register: kubernetes_worker__set_credentials_out
+  changed_when: false
+  failed_when: kubernetes_worker__set_credentials_out.rc != 0
+
+- name: Generate kubeconfig for kubelet (set-credentials) - DEBUG OUTPUT
+  ansible.builtin.debug:
+    msg: "COMMAND:{{ kubernetes_worker__set_credentials_out.cmd }} | OUTPUT: {{ kubernetes_worker__set_credentials_out.stdout }}"
+    verbosity: 2
+
+- name: Generate kubeconfig for kubelet (set-context)
+  ansible.builtin.shell: >
+    set -o errexit; \
+    kubectl config set-context default \
+      --cluster={{ k8s_config_cluster_name }} \
+      --user=system:node:{{ ansible_hostname }} \
+      --kubeconfig={{ k8s_worker_kubelet_conf_dir }}/kubeconfig
+  args:
+    executable: /bin/bash
+  register: kubernetes_worker__set_context_out
+  changed_when: false
+  failed_when: kubernetes_worker__set_context_out.rc != 0
+
+- name: Generate kubeconfig for kubelet (set-context) - DEBUG OUTPUT
+  ansible.builtin.debug:
+    msg: "COMMAND:{{ kubernetes_worker__set_context_out.cmd }} | OUTPUT: {{ kubernetes_worker__set_context_out.stdout }}"
+    verbosity: 2
+
+- name: Generate kubeconfig for kubelet (use-context)
+  ansible.builtin.shell: >
+    set -o errexit; \
+    kubectl config use-context default \
+      --kubeconfig={{ k8s_worker_kubelet_conf_dir }}/kubeconfig
+  args:
+    executable: /bin/bash
+  register: kubernetes_worker__use_context_out
+  changed_when: false
+  failed_when: kubernetes_worker__use_context_out.rc != 0
+
+- name: Generate kubeconfig for kubelet (use-context) - DEBUG OUTPUT
+  ansible.builtin.debug:
+    msg: "COMMAND:{{ kubernetes_worker__use_context_out.cmd }} | OUTPUT: {{ kubernetes_worker__use_context_out.stdout }}"
+    verbosity: 2
+
+- name: Set file permissions
+  ansible.builtin.file:
+    path: "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
+    owner: "root"
+    group: "root"
+    mode: "0640"
+    modification_time: "preserve"
+    access_time: "preserve"
+
+- name: Register checksum of kubelet current kubeconfig
+  ansible.builtin.stat:
+    path: "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
+  register: kubernetes_worker__kubelet_kubeconfig_current_stat
+
+- name: Check if kubelet kubeconfig file changed
+  when:
+    - kubernetes_worker__kubelet_kubeconfig_orig_stat.stat.checksum is defined
+    - kubernetes_worker__kubelet_kubeconfig_orig_stat.stat.checksum != kubernetes_worker__kubelet_kubeconfig_current_stat.stat.checksum
+  ansible.builtin.debug:
+    msg: "kubelet kubeconfig file changed"
+  changed_when:
+    - kubernetes_worker__kubelet_kubeconfig_orig_stat.stat.checksum != kubernetes_worker__kubelet_kubeconfig_current_stat.stat.checksum
+  notify:
+    - Restart kubelet

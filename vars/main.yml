@@ -1,0 +1,15 @@
+---
+# Kubernetes worker node binaries to download.
+k8s_worker_binaries:
+  - kube-proxy
+  - kubelet
+  - kubectl
+
+# Certificate/CA files for API server and kube-proxy
+k8s_worker_certificates:
+  - ca-k8s-apiserver.pem
+  - ca-k8s-apiserver-key.pem
+  - cert-k8s-apiserver.pem
+  - cert-k8s-apiserver-key.pem
+  - cert-k8s-proxy.pem
+  - cert-k8s-proxy-key.pem
