@@ -25,6 +25,26 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 
 **Recent changes:**
 
+## 25.0.0+1.28.5
+
+### PLEASE READ CAREFULLY
+
+Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
+
+### UPDATE
+
+- update `k8s_release` to `1.28.5`
+
+### OTHER CHANGES
+
+- adjust Github action because of Ansible Galaxy changes
+
+### MOLECULE
+
+- change to Ubuntu 22.04 for test-assets VM
+- change IP addresses
+- adjust common names for certificates / change algo to ecdsa and algo size
+
 ## 24.0.0+1.27.8
 
 ### PLEASE READ CAREFULLY
@@ -75,9 +95,24 @@ This refactoring was needed to make it possible to have `githubixx.kubernetes_co
 - Add tasks to install [ansible-role-cni](https://github.com/githubixx/ansible-role-cni) and [ansible-role-runc](https://github.com/githubixx/ansible-role-runc)
 - Use `kubernetes.core.k8s_info` module instead of calling `kubectl` binary
 
-## 23.1.2+1.27.5
+## Installation
 
-- rename `githubixx.harden-linux` to `githubixx.harden_linux`
+- Directly download from Github (Change into Ansible roles directory before cloning. You can figure out the role path by using `ansible-config dump | grep DEFAULT_ROLES_PATH` command):
+`git clone https://github.com/githubixx/ansible-role-kubernetes-worker.git githubixx.kubernetes_worker`
+
+- Via `ansible-galaxy` command and download directly from Ansible Galaxy:
+`ansible-galaxy install role githubixx.kubernetes_worker`
+
+- Create a `requirements.yml` file with the following content (this will download the role from Github) and install with
+`ansible-galaxy role install -r requirements.yml` (change `version` if needed):
+
+```yaml
+---
+roles:
+  - name: githubixx.kubernetes_worker
+    src: https://github.com/githubixx/ansible-role-kubernetes-worker.git
+    version: 25.0.0+1.28.5
+```
 
 ## Role Variables
 
@@ -254,7 +289,7 @@ k8s_worker_kubeproxy_conf_yaml: |
 
 This role has a small test setup that is created using [Molecule](https://github.com/ansible-community/molecule), libvirt (vagrant-libvirt) and QEMU/KVM. Please see my blog post [Testing Ansible roles with Molecule, libvirt (vagrant-libvirt) and QEMU/KVM](https://www.tauceti.blog/posts/testing-ansible-roles-with-molecule-libvirt-vagrant-qemu-kvm/) how to setup. The test configuration is [here](https://github.com/githubixx/ansible-role-kubernetes-worker/tree/master/molecule/default).
 
-Afterwards Molecule can be executed. This will setup a few virtual machines (VM) with supported Ubuntu OS and installs an Kubernetes cluster:
+Afterwards Molecule can be executed. This will setup a few virtual machines (VM) with supported Ubuntu OS and installs a Kubernetes cluster:
 
 ```bash
 molecule converge
@@ -265,6 +300,8 @@ At this time the cluster isn't fully functional as a network plugin is missing e
 ```bash
 molecule converge -- --extra-vars k8s_worker_setup_networking=install
 ```
+
+After this you basically have a fully functional Kubernetes cluster.
 
 A small verification step is also included:
 

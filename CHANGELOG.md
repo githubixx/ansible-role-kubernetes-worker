@@ -1,5 +1,25 @@
 # Changelog
 
+## 25.0.0+1.28.5
+
+### PLEASE READ CAREFULLY
+
+Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
+
+### UPDATE
+
+- update `k8s_release` to `1.28.5`
+
+### OTHER CHANGES
+
+- adjust Github action because of Ansible Galaxy changes
+
+### MOLECULE
+
+- change to Ubuntu 22.04 for test-assets VM
+- change IP addresses
+- adjust common names for certificates / change algo to ecdsa and algo size
+
 ## 24.0.0+1.27.8
 
 ### PLEASE READ CAREFULLY
