@@ -24,7 +24,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.5
+        ip: 172.16.10.5
   - name: test-controller1
     box: generic/ubuntu2204
     memory: 2048
@@ -39,7 +39,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.10
+        ip: 172.16.10.10
   - name: test-controller2
     box: generic/ubuntu2204
     memory: 2048
@@ -54,7 +54,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.20
+        ip: 172.16.10.20
   - name: test-controller3
     box: generic/ubuntu2004
     memory: 2048
@@ -68,7 +68,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.30
+        ip: 172.16.10.30
   - name: test-etcd1
     box: generic/ubuntu2204
     memory: 2048
@@ -80,7 +80,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.100
+        ip: 172.16.10.100
   - name: test-etcd2
     box: generic/ubuntu2204
     memory: 2048
@@ -92,7 +92,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.110
+        ip: 172.16.10.110
   - name: test-etcd3
     box: generic/ubuntu2204
     memory: 2048
@@ -104,7 +104,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.120
+        ip: 172.16.10.120
   - name: test-worker1
     box: generic/ubuntu2204
     memory: 2048
@@ -118,7 +118,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.200
+        ip: 172.16.10.200
   - name: test-worker2
     box: generic/ubuntu2004
     memory: 2048
@@ -132,7 +132,7 @@ platforms:
       - auto_config: true
         network_name: private_network
         type: static
-        ip: 192.168.10.210
+        ip: 172.16.10.210
 
 provisioner:
   name: ansible

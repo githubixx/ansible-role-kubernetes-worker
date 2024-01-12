@@ -60,15 +60,6 @@ etcd_settings_user:
 etcd_cert_hosts:
   - localhost
   - 127.0.0.1
-  - 192.168.10.100
-  - 192.168.10.110
-  - 192.168.10.120
-  - 10.10.10.100
-  - 10.10.10.110
-  - 10.10.10.120
-  - test-etcd1
-  - test-etcd2
-  - test-etcd3
 
 # Directory where the Kubernetes certificates are stored on the Ansible
 # controller host.
