@@ -13,12 +13,14 @@ Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgra
 ### OTHER CHANGES
 
 - adjust Github action because of Ansible Galaxy changes
+- `.yamllint`: extend max line length from 200 to 300
 
 ### MOLECULE
 
 - change to Ubuntu 22.04 for test-assets VM
 - change IP addresses
 - adjust common names for certificates / change algo to ecdsa and algo size
+- remove `collections.yml"
 
 ## 24.0.0+1.27.8
 
