@@ -141,7 +141,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.28.5"
+k8s_worker_release: "1.28.8"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
