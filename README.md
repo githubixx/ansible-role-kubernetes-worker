@@ -25,6 +25,12 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 
 **Recent changes:**
 
+## 25.0.1+1.28.8
+
+### UPDATE
+
+- update `k8s_release` to `1.28.8`
+
 ## 25.0.0+1.28.5
 
 ### PLEASE READ CAREFULLY
