@@ -125,6 +125,7 @@ platforms:
     cpus: 2
     groups:
       - vpn
+      - ubuntu20
       - k8s_worker
       - k8s
     interfaces:
