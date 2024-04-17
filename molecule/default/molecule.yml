@@ -13,7 +13,7 @@ driver:
 
 platforms:
   - name: test-assets
-    box: generic/ubuntu2204
+    box: alvistack/ubuntu-22.04
     memory: 2048
     cpus: 2
     groups:
