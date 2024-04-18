@@ -25,11 +25,11 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 
 **Recent changes:**
 
-## 26.0.0+1.29.3
+## 26.0.0+1.29.4
 
 ### UPDATE
 
-- update `k8s_release` to `1.29.3`
+- update `k8s_release` to `1.29.4`
 
 ## 25.0.1+1.28.8
 
@@ -153,7 +153,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.29.3"
+k8s_worker_release: "1.29.4"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
