@@ -1,79 +1,82 @@
 # Changelog
 
+## 26.0.0+1.29.4
+
+- **PLEASE READ CAREFULLY**
+
+  Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
+
+- **UPDATE**
+  - update `k8s_release` to `1.29.4`
+
+- **MOLECULE**
+  - use `alvistack` instead of `generic` Vagrant boxes
+
 ## 25.0.1+1.28.8
 
-### UPDATE
-
-- update `k8s_release` to `1.28.8`
+- **UPDATE**
+  - update `k8s_release` to `1.28.8`
 
 ## 25.0.0+1.28.5
 
-### PLEASE READ CAREFULLY
+- **PLEASE READ CAREFULLY**
 
-Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
+  Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
 
-### UPDATE
+- **UPDATE**
+  - update `k8s_release` to `1.28.5`
 
-- update `k8s_release` to `1.28.5`
+- **OTHER CHANGES**
+  - adjust Github action because of Ansible Galaxy changes
+  - `.yamllint`: extend max line length from 200 to 300
 
-### OTHER CHANGES
-
-- adjust Github action because of Ansible Galaxy changes
-- `.yamllint`: extend max line length from 200 to 300
-
-### MOLECULE
-
-- change to Ubuntu 22.04 for test-assets VM
-- change IP addresses
-- adjust common names for certificates / change algo to ecdsa and algo size
-- remove `collections.yml"
+- **MOLECULE**
+  - change to Ubuntu 22.04 for test-assets VM
+  - change IP addresses
+  - adjust common names for certificates / change algo to ecdsa and algo size
+  - remove `collections.yml"
 
 ## 24.0.0+1.27.8
 
-### PLEASE READ CAREFULLY
+- **PLEASE READ CAREFULLY**
+  
+  This release contains quite a few potential breaking changes! So review carefully before rolling out the new version of this role! A bigger part of the whole changes are related to increase security. While most of the new variables and defaults should be just fine and should just work out of the box side effects might occur.
 
-This release contains quite a few potential breaking changes! So review carefully before rolling out the new version of this role! A bigger part of the whole changes are related to increase security. While most of the new variables and defaults should be just fine and should just work out of the box side effects might occur.
+  All the newly introduced or changed variables have detailed comments in [README](https://github.com/githubixx/ansible-role-kubernetes-worker/blob/master/README.md). So please read them carefully!
 
-All the newly introduced or changed variables have detailed comments in [README](https://github.com/githubixx/ansible-role-kubernetes-worker/blob/master/README.md). So please read them carefully!
+  This refactoring was needed to make it possible to have `githubixx.kubernetes_controller` and `githubixx.kubernetes_worker` deployed on the same host e.g. They were some intersections between the two roles that had to be fixed.
 
-This refactoring was needed to make it possible to have `githubixx.kubernetes_controller` and `githubixx.kubernetes_worker` deployed on the same host e.g. They were some intersections between the two roles that had to be fixed.
+- **UPDATE**
+  - update `k8s_release` to `1.27.8`
 
-### UPDATE
+- **BREAKING**
+  - Rename variable `k8s_conf_dir` to `k8s_worker_conf_dir`. Additionally the default value changed from `/usr/lib/kubernetes` to `/etc/kubernetes/worker`.
+  - Rename variable `k8s_bin_dir` to `k8s_worker_bin_dir`.
+  - `k8s_worker_binaries` variable is no longer defined in `defaults/main.yml` but in `vars/main.yml`. Since this list is fixed anyways it makes no sense to allow to modify this list.
+  - `k8s_worker_certificates` variable is no longer defined in `defaults/main.yml` but in `vars/main.yml`. Since this list is fixed anyways it makes no sense to allow to modify this list.
+  - Introduce variable `k8s_worker_pki_dir`. All certificate files specified in `k8s_worker_certificates` (see `vars/main.yml`) will be stored here. Related to this: Certificate related settings in `k8s_worker_kubelet_conf_yaml` used `k8s_conf_dir` before and now use `k8s_ctl_pki_dir`. That's `clientCAFile`, `tlsCertFile` and `tlsPrivateKeyFile`.
+  - The default value for `k8s_interface` changed from `tap0` to `eth0`.
+  - The variable `k8s_config_directory` is gone. It's no longer in use. After the upgrade to this release you can delete this directory (if you accept the new default!) and it's content (make a backup esp. of `admin.kubeconfig` file - just in case!)
+  - Remove variable `k8s_worker_download_dir` (no longer needed).
+  - Change default value of `k8s_worker_kubelet_conf_dir` to `{{ k8s_worker_conf_dir }}/kubelet`.
+  - Change default value of `k8s_worker_kubeproxy_conf_dir` to `{{ k8s_worker_conf_dir }}/kube-proxy`.
 
-- update `k8s_release` to `1.27.8`
+- **FEATURE**
+  - When downloading the Kubernetes binaries the task checks the SHA512 checksum.
+  - Introduce `k8s_worker_api_endpoint_host` and `k8s_worker_api_endpoint_port` variables. Previously `kubelet` and `kube-proxy` where configured to connect to the first host in the Ansible `k8s_controller` group and communicate with the `kube-apiserver` that was running there. This was hard-coded and couldn't be changed. If that host was down the K8s worker nodes didn't receive any updates. Now one can install and use a load balancer like `haproxy` e.g. that distributes requests between all `kube-apiserver`'s and takes a `kube-apiserver` out of rotation if that one is down (also see my Ansible [haproxy role](https://github.com/githubixx/ansible-role-haproxy) for that use case). The default is still to use the first host/kube-apiserver in the Ansible `k8s_controller` group. So behaviorwise nothing changed basically.
+  - Add task to generate `kubeconfig` for `kubelet` service (previously this was a separate [playbook](https://github.com/githubixx/ansible-kubernetes-playbooks/tree/v15.0.0_r1.27.5/kubeauthconfig)).
+  - Add task to generate `kubeconfig` for `kube-proxy` service (previously this was a separate [playbook](https://github.com/githubixx/ansible-kubernetes-playbooks/tree/v15.0.0_r1.27.5/kubeauthconfig)).
 
-### BREAKING
+- **OTHER CHANGES**
+  - Use `kubernetes.core.*` modules instead of `kubectl` binary
+  - Fix some `ansible-lint` issues
 
-- Rename variable `k8s_conf_dir` to `k8s_worker_conf_dir`. Additionally the default value changed from `/usr/lib/kubernetes` to `/etc/kubernetes/worker`.
-- Rename variable `k8s_bin_dir` to `k8s_worker_bin_dir`.
-- `k8s_worker_binaries` variable is no longer defined in `defaults/main.yml` but in `vars/main.yml`. Since this list is fixed anyways it makes no sense to allow to modify this list.
-- `k8s_worker_certificates` variable is no longer defined in `defaults/main.yml` but in `vars/main.yml`. Since this list is fixed anyways it makes no sense to allow to modify this list.
-- Introduce variable `k8s_worker_pki_dir`. All certificate files specified in `k8s_worker_certificates` (see `vars/main.yml`) will be stored here. Related to this: Certificate related settings in `k8s_worker_kubelet_conf_yaml` used `k8s_conf_dir` before and now use `k8s_ctl_pki_dir`. That's `clientCAFile`, `tlsCertFile` and `tlsPrivateKeyFile`.
-- The default value for `k8s_interface` changed from `tap0` to `eth0`.
-- The variable `k8s_config_directory` is gone. It's no longer in use. After the upgrade to this release you can delete this directory (if you accept the new default!) and it's content (make a backup esp. of `admin.kubeconfig` file - just in case!)
-- Remove variable `k8s_worker_download_dir` (no longer needed).
-- Change default value of `k8s_worker_kubelet_conf_dir` to `{{ k8s_worker_conf_dir }}/kubelet`.
-- Change default value of `k8s_worker_kubeproxy_conf_dir` to `{{ k8s_worker_conf_dir }}/kube-proxy`.
-
-### FEATURE
-
-- When downloading the Kubernetes binaries the task checks the SHA512 checksum.
-- Introduce `k8s_worker_api_endpoint_host` and `k8s_worker_api_endpoint_port` variables. Previously `kubelet` and `kube-proxy` where configured to connect to the first host in the Ansible `k8s_controller` group and communicate with the `kube-apiserver` that was running there. This was hard-coded and couldn't be changed. If that host was down the K8s worker nodes didn't receive any updates. Now one can install and use a load balancer like `haproxy` e.g. that distributes requests between all `kube-apiserver`'s and takes a `kube-apiserver` out of rotation if that one is down (also see my Ansible [haproxy role](https://github.com/githubixx/ansible-role-haproxy) for that use case). The default is still to use the first host/kube-apiserver in the Ansible `k8s_controller` group. So behaviorwise nothing changed basically.
-- Add task to generate `kubeconfig` for `kubelet` service (previously this was a separate [playbook](https://github.com/githubixx/ansible-kubernetes-playbooks/tree/v15.0.0_r1.27.5/kubeauthconfig)).
-- Add task to generate `kubeconfig` for `kube-proxy` service (previously this was a separate [playbook](https://github.com/githubixx/ansible-kubernetes-playbooks/tree/v15.0.0_r1.27.5/kubeauthconfig)).
-
-### OTHER CHANGES
-
-- Use `kubernetes.core.*` modules instead of `kubectl` binary
-- Fix some `ansible-lint` issues
-
-### MOLECULE
-
-- Updated all files to reflect the changes introduces with this version
-- Tasks for creating `kubeconfig` for `kubelet` and `kube-proxy` are no longer needed as they're now part of `kubernetes_worker` role
-- Add `haproxy` to Ubuntu 22 hosts to test new `k8s_worker_api_endpoint_host` and `k8s_worker_api_endpoint_port` settings
-- Add tasks to install [ansible-role-cni](https://github.com/githubixx/ansible-role-cni) and [ansible-role-runc](https://github.com/githubixx/ansible-role-runc)
-- Use `kubernetes.core.k8s_info` module instead of calling `kubectl` binary
+- **MOLECULE**
+  - Updated all files to reflect the changes introduces with this version
+  - Tasks for creating `kubeconfig` for `kubelet` and `kube-proxy` are no longer needed as they're now part of `kubernetes_worker` role
+  - Add `haproxy` to Ubuntu 22 hosts to test new `k8s_worker_api_endpoint_host` and `k8s_worker_api_endpoint_port` settings
+  - Add tasks to install [ansible-role-cni](https://github.com/githubixx/ansible-role-cni) and [ansible-role-runc](https://github.com/githubixx/ansible-role-runc)
+  - Use `kubernetes.core.k8s_info` module instead of calling `kubectl` binary
 
 ## 23.1.2+1.27.5
 
