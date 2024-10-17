@@ -1,5 +1,14 @@
 # Changelog
 
+## 27.0.0+1.30.5
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.30.5`
+
+- **OTHER CHANGES**
+  - support Ubuntu 24.04
+  - update `.yamllint`
+
 ## 26.0.2+1.29.9
 
 - **OTHER CHANGES**
@@ -8,7 +17,7 @@
 ## 26.0.1+1.29.9
 
 - **UPDATE**
-  - update `k8s_release` to `1.29.9`
+  - update `k8s_worker_release` to `1.29.9`
 
 ## 26.0.0+1.29.4
 
@@ -17,7 +26,7 @@
   Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
 
 - **UPDATE**
-  - update `k8s_release` to `1.29.4`
+  - update `k8s_worker_release` to `1.29.4`
 
 - **MOLECULE**
   - use `alvistack` instead of `generic` Vagrant boxes
@@ -25,7 +34,7 @@
 ## 25.0.1+1.28.8
 
 - **UPDATE**
-  - update `k8s_release` to `1.28.8`
+  - update `k8s_worker_release` to `1.28.8`
 
 ## 25.0.0+1.28.5
 
@@ -34,7 +43,7 @@
   Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
 
 - **UPDATE**
-  - update `k8s_release` to `1.28.5`
+  - update `k8s_worker_release` to `1.28.5`
 
 - **OTHER CHANGES**
   - adjust Github action because of Ansible Galaxy changes
@@ -57,7 +66,7 @@
   This refactoring was needed to make it possible to have `githubixx.kubernetes_controller` and `githubixx.kubernetes_worker` deployed on the same host e.g. They were some intersections between the two roles that had to be fixed.
 
 - **UPDATE**
-  - update `k8s_release` to `1.27.8`
+  - update `k8s_worker_release` to `1.27.8`
 
 - **BREAKING**
   - Rename variable `k8s_conf_dir` to `k8s_worker_conf_dir`. Additionally the default value changed from `/usr/lib/kubernetes` to `/etc/kubernetes/worker`.
