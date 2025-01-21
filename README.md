@@ -14,7 +14,7 @@ You also need [containerd](https://github.com/githubixx/ansible-role-containerd)
 
 ## Supported OS
 
-- Ubuntu 20.04 (Focal Fossa) (reaches EOL April 2024 - not recommended)
+- Ubuntu 20.04 (Focal Fossa) (reaches EOL April 2025 - not recommended)
 - Ubuntu 22.04 (Jammy Jellyfish)
 - Ubuntu 24.04 (Noble Numbat) (recommended)
 
