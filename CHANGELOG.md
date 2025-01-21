@@ -1,5 +1,10 @@
 # Changelog
 
+## 27.0.1+1.30.9
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.30.9`
+
 ## 27.0.0+1.30.5
 
 - **UPDATE**
