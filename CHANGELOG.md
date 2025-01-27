@@ -1,5 +1,10 @@
 # Changelog
 
+## 28.0.0+1.31.5
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.31.5`
+
 ## 27.0.1+1.30.9
 
 - **UPDATE**
@@ -87,7 +92,7 @@
 
 - **FEATURE**
   - When downloading the Kubernetes binaries the task checks the SHA512 checksum.
-  - Introduce `k8s_worker_api_endpoint_host` and `k8s_worker_api_endpoint_port` variables. Previously `kubelet` and `kube-proxy` where configured to connect to the first host in the Ansible `k8s_controller` group and communicate with the `kube-apiserver` that was running there. This was hard-coded and couldn't be changed. If that host was down the K8s worker nodes didn't receive any updates. Now one can install and use a load balancer like `haproxy` e.g. that distributes requests between all `kube-apiserver`'s and takes a `kube-apiserver` out of rotation if that one is down (also see my Ansible [haproxy role](https://github.com/githubixx/ansible-role-haproxy) for that use case). The default is still to use the first host/kube-apiserver in the Ansible `k8s_controller` group. So behaviorwise nothing changed basically.
+  - Introduce `k8s_worker_api_endpoint_host` and `k8s_worker_api_endpoint_port` variables. Previously `kubelet` and `kube-proxy` where configured to connect to the first host in the Ansible `k8s_controller` group and communicate with the `kube-apiserver` that was running there. This was hard-coded and couldn't be changed. If that host was down the K8s worker nodes didn't receive any updates. Now one can install and use a load balancer like `haproxy` e.g. that distributes requests between all `kube-apiserver`'s and takes a `kube-apiserver` out of rotation if that one is down (also see my Ansible [haproxy role](https://github.com/githubixx/ansible-role-haproxy) for that use case). The default is still to use the first host/kube-apiserver in the Ansible `k8s_controller` group. So behavior-wise nothing changed basically.
   - Add task to generate `kubeconfig` for `kubelet` service (previously this was a separate [playbook](https://github.com/githubixx/ansible-kubernetes-playbooks/tree/v15.0.0_r1.27.5/kubeauthconfig)).
   - Add task to generate `kubeconfig` for `kube-proxy` service (previously this was a separate [playbook](https://github.com/githubixx/ansible-kubernetes-playbooks/tree/v15.0.0_r1.27.5/kubeauthconfig)).
 
@@ -139,7 +144,7 @@
 ## 21.1.0+1.25.9
 
 - update `k8s_release` to `1.25.9`
-- move kubelet parameter `--register-node` to `kubelet.conf` (using the option as parameter is deprected)
+- move kubelet parameter `--register-node` to `kubelet.conf` (using the option as parameter is deprecated)
 - `tasks/main.yml`: add `changed_when: false` to `Disable swap` task
 - `tasks/main.yml`: use `ansible.posix.mount` instead of `ansible.builtin.mount`
 - `kubelet`: remove `--container-runtime` (Flag `--container-runtime` has been deprecated, will be removed in 1.27 as the only valid value is `remote`)
@@ -259,7 +264,7 @@ update `k8s_release` to `1.24.4`
 
 - update `k8s_release` to `1.14.2`
 - update `k8s_cni_plugin_version` to `0.7.5`
-- introduce `k8s_cni_plugin_checksum` variable to determine if CNI plugin tarball has changed and needs to be unarchived
+- introduce `k8s_cni_plugin_checksum` variable to determine if CNI plugin tarball has changed and needs to be unarchive
 
 ## 8.0.1+1.13.5
 
@@ -308,7 +313,7 @@ update `k8s_release` to `1.24.4`
 
 - update `k8s_release` to `1.10.4`
 - introduce `k8s_worker_kubelet_conf_yaml` variable
-- removed deprecated setttings in `k8s_worker_kubelet_settings`
+- removed deprecated settings in `k8s_worker_kubelet_settings`
 - moved settings in `k8s_worker_kubelet_settings` to `k8s_worker_kubelet_conf_yaml`:
   see [kubelet-config-file](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
   see [types.go](https://github.com/kubernetes/kubernetes/blob/release-1.10/pkg/kubelet/apis/kubeletconfig/v1beta1/types.go)
@@ -328,7 +333,7 @@ update `k8s_release` to `1.24.4`
 
 ## r4.1.0_v1.9.3
 
-- remove obsolet kubeconfig.j2 template
+- remove obsolete kubeconfig.j2 template
 
 ## r4.0.0_v1.9.3
 
