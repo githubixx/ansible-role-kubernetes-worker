@@ -2,6 +2,9 @@
 
 ## 29.0.0+1.32.8
 
+- **BREAKING**
+  - Removed Ubuntu 20.04 because reached end of life
+
 - **UPDATE**
   - update `k8s_worker_release` to `1.32.8`
   - `kubelet.service.j2`: Update `kubelet` systemd service file. Utilize the systemd watchdog capability to restart the kubelet when the kubelet health check fails, and limit the maximum number of restarts within a given time period. This can enhance the reliability of the kubelet to some extent (see [integrate kubelet with the systemd watchdog](https://github.com/kubernetes/kubernetes/pull/127566)):
@@ -11,6 +14,7 @@
 
 - **MOLECULE**
   - Removed Ubuntu 20.04 because reached end of life
+  - Fix `ansible-lint` issues
 
 ## 28.0.1+1.31.11
 
