@@ -14,7 +14,6 @@ You also need [containerd](https://github.com/githubixx/ansible-role-containerd)
 
 ## Supported OS
 
-- Ubuntu 20.04 (Focal Fossa) (reaches EOL April 2025 - not recommended)
 - Ubuntu 22.04 (Jammy Jellyfish)
 - Ubuntu 24.04 (Noble Numbat) (recommended)
 
@@ -36,6 +35,9 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
     - Changed: `Restart=on-failure` -> `Restart=always`
     - Changed: `RestartSec=5` -> `RestartSec=10`
     - Added: `WatchdogSec=30s`
+
+- **MOLECULE**
+  - Removed Ubuntu 20.04 because reached end of life
 
 ## 28.0.1+1.31.11
 

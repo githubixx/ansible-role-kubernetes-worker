@@ -9,6 +9,9 @@
     - Changed: `RestartSec=5` -> `RestartSec=10`
     - Added: `WatchdogSec=30s`
 
+- **MOLECULE**
+  - Removed Ubuntu 20.04 because reached end of life
+
 ## 28.0.1+1.31.11
 
 - **UPDATE**
