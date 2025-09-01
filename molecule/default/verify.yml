@@ -15,16 +15,16 @@
 
     - name: Print namespaces
       ansible.builtin.debug:
-        var: "{{ k8s__namespaces_info | community.general.json_query(query) }}"
+        var: "{{ k8s__namespaces_info | community.general.json_query(mol__query) }}"
       vars:
-        query: "length(resources)"
+        mol__query: "length(resources)"
       when: ansible_verbosity > 1
 
     - name: Register namespaces count
       ansible.builtin.set_fact:
-        k8s__namespaces_count: "{{ k8s__namespaces_info | community.general.json_query(query) }}"
+        k8s__namespaces_count: "{{ k8s__namespaces_info | community.general.json_query(mol__query) }}"
       vars:
-        query: "length(resources)"
+        mol__query: "length(resources)"
 
     - name: There should be four namespaces at least
       ansible.builtin.assert:
