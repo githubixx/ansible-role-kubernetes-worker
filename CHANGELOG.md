@@ -1,5 +1,14 @@
 # Changelog
 
+## 29.0.0+1.32.8
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.32.8`
+  - `kubelet.service.j2`: Update `kubelet` systemd service file. Utilize the systemd watchdog capability to restart the kubelet when the kubelet health check fails, and limit the maximum number of restarts within a given time period. This can enhance the reliability of the kubelet to some extent (see [integrate kubelet with the systemd watchdog](https://github.com/kubernetes/kubernetes/pull/127566)):
+    - Changed: `Restart=on-failure` -> `Restart=always`
+    - Changed: `RestartSec=5` -> `RestartSec=10`
+    - Added: `WatchdogSec=30s`
+
 ## 28.0.1+1.31.11
 
 - **UPDATE**
