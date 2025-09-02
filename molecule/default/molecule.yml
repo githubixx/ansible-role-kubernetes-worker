@@ -56,7 +56,7 @@ platforms:
         type: static
         ip: 172.16.10.20
   - name: test-controller3
-    box: alvistack/ubuntu-20.04
+    box: alvistack/ubuntu-24.04
     memory: 2048
     cpus: 2
     groups:
@@ -120,12 +120,12 @@ platforms:
         type: static
         ip: 172.16.10.200
   - name: test-worker2
-    box: alvistack/ubuntu-20.04
+    box: alvistack/ubuntu-24.04
     memory: 2048
     cpus: 2
     groups:
       - vpn
-      - ubuntu20
+      - ubuntu24
       - k8s_worker
       - k8s
     interfaces:

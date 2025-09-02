@@ -4,7 +4,7 @@ This Ansible role is used in [Kubernetes the not so hard way with Ansible - Work
 
 ## Versions
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `28.0.0+1.31.5` means this is release `28.0.0` of this role and it's meant to be used with Kubernetes version `1.31.5` (but should work with any K8s 1.31.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `29.0.0+1.32.8` means this is release `29.0.0` of this role and it's meant to be used with Kubernetes version `1.32.8` (but should work with any K8s 1.31.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
 
 ## Requirements
 
@@ -14,7 +14,6 @@ You also need [containerd](https://github.com/githubixx/ansible-role-containerd)
 
 ## Supported OS
 
-- Ubuntu 20.04 (Focal Fossa) (reaches EOL April 2025 - not recommended)
 - Ubuntu 22.04 (Jammy Jellyfish)
 - Ubuntu 24.04 (Noble Numbat) (recommended)
 
@@ -27,6 +26,22 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 **IMPORTANT** Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
 
 **Recent changes:**
+
+## 29.0.0+1.32.8
+
+- **BREAKING**
+  - Removed Ubuntu 20.04 because reached end of life
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.32.8`
+  - `kubelet.service.j2`: Update `kubelet` systemd service file. Utilize the systemd watchdog capability to restart the kubelet when the kubelet health check fails, and limit the maximum number of restarts within a given time period. This can enhance the reliability of the kubelet to some extent (see [integrate kubelet with the systemd watchdog](https://github.com/kubernetes/kubernetes/pull/127566)):
+    - Changed: `Restart=on-failure` -> `Restart=always`
+    - Changed: `RestartSec=5` -> `RestartSec=10`
+    - Added: `WatchdogSec=30s`
+
+- **MOLECULE**
+  - Removed Ubuntu 20.04 because reached end of life
+  - Fix `ansible-lint` issues
 
 ## 28.0.1+1.31.11
 
@@ -52,11 +67,6 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
   - support Ubuntu 24.04
   - update `.yamllint`
 
-## 26.0.2+1.29.9
-
-- **OTHER CHANGES**
-  - fix download URLs for Kubernetes binaries (see: [Download Kubernetes - Binaries](https://kubernetes.io/releases/download/#binaries)
-
 ## Installation
 
 - Directly download from Github (Change into Ansible roles directory before cloning. You can figure out the role path by using `ansible-config dump | grep DEFAULT_ROLES_PATH` command):
@@ -73,7 +83,7 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 roles:
   - name: githubixx.kubernetes_worker
     src: https://github.com/githubixx/ansible-role-kubernetes-worker.git
-    version: 28.0.1+1.31.11
+    version: 29.0.0+1.32.8
 ```
 
 ## Role Variables
@@ -101,7 +111,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.31.11"
+k8s_worker_release: "1.32.8"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -249,7 +259,7 @@ k8s_worker_kubeproxy_conf_yaml: |
 
 ## Testing
 
-This role has a small test setup that is created using [Molecule](https://github.com/ansible-community/molecule), libvirt (vagrant-libvirt) and QEMU/KVM. Please see my blog post [Testing Ansible roles with Molecule, libvirt (vagrant-libvirt) and QEMU/KVM](https://www.tauceti.blog/posts/testing-ansible-roles-with-molecule-libvirt-vagrant-qemu-kvm/) how to setup. The test configuration is [here](https://github.com/githubixx/ansible-role-kubernetes-worker/tree/master/molecule/default).
+This role has a small test setup that is created using [Molecule](https://github.com/ansible-community/molecule), libvirt (vagrant-libvirt) and QEMU/KVM. Please see my blog post [Testing Ansible roles with Molecule, libvirt (vagrant-libvirt) and QEMU/KVM](https://www.tauceti.blog/posts/testing-ansible-roles-with-molecule-libvirt-vagrant-qemu-kvm/) how to setup. The Molecule test configuration is in [molecule/default](https://github.com/githubixx/ansible-role-kubernetes-worker/tree/master/molecule/default).
 
 Afterwards Molecule can be executed. This will setup a few virtual machines (VM) with supported Ubuntu OS and installs a Kubernetes cluster:
 

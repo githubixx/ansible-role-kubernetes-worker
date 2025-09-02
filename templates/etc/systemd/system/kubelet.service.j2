@@ -4,6 +4,7 @@ Description=Kubernetes Kubelet
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 After=network-online.target
 After=containerd.service
+Requires=network-online.target
 Requires=containerd.service
 Wants=network-online.target
 
@@ -13,8 +14,9 @@ ExecStart={{ k8s_worker_bin_dir }}/kubelet \
   --{{ setting }}{% if k8s_worker_kubelet_settings[setting] != "" %}={{ k8s_worker_kubelet_settings[setting] }}{% endif %}{% if not loop.last %} \{% endif %}
 {%- endfor %}
 
-Restart=on-failure
-RestartSec=5
+Restart=always
+RestartSec=10
+WatchdogSec=30s
 
 [Install]
 WantedBy=multi-user.target
