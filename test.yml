@@ -1,4 +1,0 @@
-k8s_worker_api_endpoint_host: "{% set controller_host = groups['k8s_controller'][0] %}{{ hostvars[controller_host]['ansible_' + hostvars[controller_host]['k8s_interface']].ipv4.address }}"
-
-k8s_worker_api_endpoint_host: "{{ hostvars[groups['k8s_controller'] | first]['ansible_' + hostvars[groups['k8s_controller'] | first]['k8s_interface']].ipv4.address }}"
-
