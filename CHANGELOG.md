@@ -1,5 +1,13 @@
 # Changelog
 
+## 29.1.0+1.32.9
+
+- **UPDATE**
+  - update `k8s_ctl_release` to `1.32.9`
+
+- **MOLECULE**
+  - install `python3-kubernetes` package instead `kubernetes` Pip in `prepare.yml`
+
 ## 29.0.0+1.32.8
 
 - **BREAKING**
