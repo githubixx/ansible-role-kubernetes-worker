@@ -1,5 +1,10 @@
 # Changelog
 
+## 30.0.0+1.33.6
+
+- **UPDATE**
+  - update `k8s_ctl_release` to `1.33.6`
+
 ## 29.1.0+1.32.9
 
 - **UPDATE**
