@@ -80,3 +80,34 @@
       ansible.builtin.assert:
         that:
           - k8s__namespaces_count|int >= 4
+
+    - name: Fetch node information
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Node
+        kubeconfig: "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+      register: k8s__nodes_info
+
+    - name: Register node names
+      ansible.builtin.set_fact:
+        k8s__node_names: "{{ k8s__nodes_info | community.general.json_query(mol__query) }}"
+      vars:
+        mol__query: "resources[].metadata.name"
+
+    - name: Register ready node names
+      ansible.builtin.set_fact:
+        k8s__node_ready_names: "{{ k8s__nodes_info | community.general.json_query(mol__query) }}"
+      vars:
+        mol__query: "resources[?status.conditions[?type=='Ready' && status=='True']].metadata.name"
+
+    - name: Ensure all expected worker nodes joined cluster
+      ansible.builtin.assert:
+        that:
+          - item in k8s__node_names
+      loop: "{{ groups['k8s_worker'] }}"
+
+    - name: Ensure all expected worker nodes are Ready
+      ansible.builtin.assert:
+        that:
+          - item in k8s__node_ready_names
+      loop: "{{ groups['k8s_worker'] }}"
