@@ -2,6 +2,56 @@
 # Copyright (C) 2023 Robert Wimmer
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+- name: Verify worker services health
+  hosts: k8s_worker
+  remote_user: vagrant
+  become: true
+  gather_facts: false
+  vars:
+    mol__worker_required_files:
+      - path: /etc/systemd/system/kubelet.service
+        mode: "0644"
+      - path: /etc/systemd/system/kube-proxy.service
+        mode: "0644"
+      - path: /etc/kubernetes/worker/kubelet/kubelet-config.yaml
+        mode: "0600"
+      - path: /etc/kubernetes/worker/kube-proxy/kubeproxy-config.yaml
+        mode: "0600"
+      - path: /etc/kubernetes/worker/kubelet/kubeconfig
+        mode: "0640"
+      - path: /etc/kubernetes/worker/kube-proxy/kubeconfig
+        mode: "0640"
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Ensure kubelet service is running and enabled
+      ansible.builtin.assert:
+        that:
+          - "'kubelet.service' in ansible_facts.services"
+          - ansible_facts.services['kubelet.service'].state == 'running'
+          - ansible_facts.services['kubelet.service'].status == 'enabled'
+
+    - name: Ensure kube-proxy service is running and enabled
+      ansible.builtin.assert:
+        that:
+          - "'kube-proxy.service' in ansible_facts.services"
+          - ansible_facts.services['kube-proxy.service'].state == 'running'
+          - ansible_facts.services['kube-proxy.service'].status == 'enabled'
+
+    - name: Gather required file metadata
+      ansible.builtin.stat:
+        path: "{{ item.path }}"
+      loop: "{{ mol__worker_required_files }}"
+      register: mol__worker_required_file_stats
+
+    - name: Ensure required files exist and have expected permissions
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.mode == item.item.mode
+      loop: "{{ mol__worker_required_file_stats.results }}"
+
 - name: Verify setup
   hosts: test-assets
   remote_user: vagrant
