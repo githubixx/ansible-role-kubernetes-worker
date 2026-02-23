@@ -21,6 +21,23 @@
         mode: "0640"
       - path: /etc/kubernetes/worker/kube-proxy/kubeconfig
         mode: "0640"
+    mol__worker_required_pki_files:
+      - path: /etc/kubernetes/worker/pki/ca-k8s-apiserver.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/ca-k8s-apiserver-key.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-apiserver.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-apiserver-key.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-proxy.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-proxy-key.pem
+        mode: "0640"
+      - path: "/etc/kubernetes/worker/pki/cert-{{ inventory_hostname }}.pem"
+        mode: "0640"
+      - path: "/etc/kubernetes/worker/pki/cert-{{ inventory_hostname }}-key.pem"
+        mode: "0640"
   tasks:
     - name: Gather service facts
       ansible.builtin.service_facts:
@@ -51,6 +68,19 @@
           - item.stat.exists
           - item.stat.mode == item.item.mode
       loop: "{{ mol__worker_required_file_stats.results }}"
+
+    - name: Gather worker PKI file metadata
+      ansible.builtin.stat:
+        path: "{{ item.path }}"
+      loop: "{{ mol__worker_required_pki_files }}"
+      register: mol__worker_required_pki_file_stats
+
+    - name: Ensure worker certificates/keys exist and have expected permissions
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.mode == item.item.mode
+      loop: "{{ mol__worker_required_pki_file_stats.results }}"
 
     - name: Read kubelet systemd unit file
       ansible.builtin.slurp:
