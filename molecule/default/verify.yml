@@ -111,6 +111,54 @@
           - mol__kubeproxy_config.clientConnection.kubeconfig == '/etc/kubernetes/worker/kube-proxy/kubeconfig'
           - mol__kubeproxy_config.mode is defined
 
+    - name: Load role default variables
+      ansible.builtin.include_vars:
+        file: "../../defaults/main.yml"
+        name: mol__role_defaults
+
+    - name: Register expected Kubernetes version from role defaults
+      ansible.builtin.set_fact:
+        mol__expected_k8s_version: "v{{ mol__role_defaults.k8s_worker_release }}"
+
+    - name: Fetch kubelet version
+      ansible.builtin.command:
+        argv:
+          - kubelet
+          - --version
+      register: mol__kubelet_version_cmd
+      changed_when: false
+
+    - name: Fetch kube-proxy version
+      ansible.builtin.command:
+        argv:
+          - kube-proxy
+          - --version
+      register: mol__kubeproxy_version_cmd
+      changed_when: false
+
+    - name: Fetch kubectl client version
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - version
+          - --client
+          - --output=json
+      register: mol__kubectl_version_cmd
+      changed_when: false
+
+    - name: Parse binary versions
+      ansible.builtin.set_fact:
+        mol__kubelet_version: "{{ mol__kubelet_version_cmd.stdout | regex_search('v[0-9]+\\.[0-9]+\\.[0-9]+') }}"
+        mol__kubeproxy_version: "{{ mol__kubeproxy_version_cmd.stdout | regex_search('v[0-9]+\\.[0-9]+\\.[0-9]+') }}"
+        mol__kubectl_version: "{{ (mol__kubectl_version_cmd.stdout | from_json).clientVersion.gitVersion }}"
+
+    - name: Ensure worker binary versions match role release
+      ansible.builtin.assert:
+        that:
+          - mol__kubelet_version == mol__expected_k8s_version
+          - mol__kubeproxy_version == mol__expected_k8s_version
+          - mol__kubectl_version == mol__expected_k8s_version
+
 - name: Verify setup
   hosts: test-assets
   remote_user: vagrant
