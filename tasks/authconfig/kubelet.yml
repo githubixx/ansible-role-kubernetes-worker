@@ -26,7 +26,7 @@
 - name: Generate kubeconfig for kubelet (set-credentials)
   ansible.builtin.shell: >
     set -o errexit; \
-    kubectl config set-credentials system:node:{{ ansible_hostname }} \
+    kubectl config set-credentials system:node:{{ ansible_facts['hostname'] }} \
       --client-certificate={{ k8s_worker_pki_dir }}/cert-{{ inventory_hostname }}.pem \
       --client-key={{ k8s_worker_pki_dir }}/cert-{{ inventory_hostname }}-key.pem \
       --embed-certs=true \
@@ -47,7 +47,7 @@
     set -o errexit; \
     kubectl config set-context default \
       --cluster={{ k8s_config_cluster_name }} \
-      --user=system:node:{{ ansible_hostname }} \
+      --user=system:node:{{ ansible_facts['hostname'] }} \
       --kubeconfig={{ k8s_worker_kubelet_conf_dir }}/kubeconfig
   args:
     executable: /bin/bash

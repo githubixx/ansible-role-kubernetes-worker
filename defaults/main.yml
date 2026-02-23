@@ -21,7 +21,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.33.6"
+k8s_worker_release: "1.34.4"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -60,7 +60,7 @@ k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
 # variable of https://github.com/githubixx/ansible-role-kubernetes-ca
 # role). If it's not specified you'll get certificate errors in the
 # logs of the services mentioned above.
-k8s_worker_api_endpoint_host: "{{ hostvars[groups['k8s_controller'] | first]['ansible_' + hostvars[groups['k8s_controller'] | first]['k8s_interface']].ipv4.address }}"
+k8s_worker_api_endpoint_host: "{{ hostvars[groups['k8s_controller'] | first]['ansible_facts'][hostvars[groups['k8s_controller'] | first]['k8s_interface']]['ipv4']['address'] }}"
 
 # As above just for the port. It specifies on which port the
 # Kubernetes API servers are listening. Again if there is a loadbalancer
@@ -97,14 +97,14 @@ k8s_worker_kubelet_conf_dir: "{{ k8s_worker_conf_dir }}/kubelet"
 # https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads
 k8s_worker_kubelet_settings:
   "config": "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
-  "node-ip": "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
+  "node-ip": "{{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}"
   "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
 
 # kubelet kubeconfig
 k8s_worker_kubelet_conf_yaml: |
   kind: KubeletConfiguration
   apiVersion: kubelet.config.k8s.io/v1beta1
-  address: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}
+  address: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}
   authentication:
     anonymous:
       enabled: false
@@ -118,7 +118,7 @@ k8s_worker_kubelet_conf_yaml: |
   clusterDNS:
     - "10.32.0.254"
   failSwapOn: true
-  healthzBindAddress: "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
+  healthzBindAddress: "{{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}"
   healthzPort: 10248
   runtimeRequestTimeout: "15m"
   serializeImagePulls: false
@@ -138,10 +138,10 @@ k8s_worker_kubeproxy_settings:
 k8s_worker_kubeproxy_conf_yaml: |
   kind: KubeProxyConfiguration
   apiVersion: kubeproxy.config.k8s.io/v1alpha1
-  bindAddress: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}
+  bindAddress: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}
   clientConnection:
     kubeconfig: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
-  healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}:10256
+  healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}:10256
   mode: "ipvs"
   ipvs:
     minSyncPeriod: 0s

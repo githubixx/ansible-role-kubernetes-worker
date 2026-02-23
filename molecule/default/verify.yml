@@ -2,9 +2,237 @@
 # Copyright (C) 2023 Robert Wimmer
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+- name: Verify worker services health
+  hosts: k8s_worker
+  remote_user: vagrant
+  become: true
+  gather_facts: false
+  vars:
+    mol__worker_required_files:
+      - path: /etc/systemd/system/kubelet.service
+        mode: "0644"
+      - path: /etc/systemd/system/kube-proxy.service
+        mode: "0644"
+      - path: /etc/kubernetes/worker/kubelet/kubelet-config.yaml
+        mode: "0600"
+      - path: /etc/kubernetes/worker/kube-proxy/kubeproxy-config.yaml
+        mode: "0600"
+      - path: /etc/kubernetes/worker/kubelet/kubeconfig
+        mode: "0640"
+      - path: /etc/kubernetes/worker/kube-proxy/kubeconfig
+        mode: "0640"
+    mol__worker_required_pki_files:
+      - path: /etc/kubernetes/worker/pki/ca-k8s-apiserver.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/ca-k8s-apiserver-key.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-apiserver.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-apiserver-key.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-proxy.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-proxy-key.pem
+        mode: "0640"
+      - path: "/etc/kubernetes/worker/pki/cert-{{ inventory_hostname }}.pem"
+        mode: "0640"
+      - path: "/etc/kubernetes/worker/pki/cert-{{ inventory_hostname }}-key.pem"
+        mode: "0640"
+    mol__worker_sensitive_auth_files:
+      - path: /etc/kubernetes/worker/kubelet/kubeconfig
+        mode: "0640"
+      - path: /etc/kubernetes/worker/kube-proxy/kubeconfig
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/ca-k8s-apiserver.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/ca-k8s-apiserver-key.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-apiserver.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-apiserver-key.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-proxy.pem
+        mode: "0640"
+      - path: /etc/kubernetes/worker/pki/cert-k8s-proxy-key.pem
+        mode: "0640"
+      - path: "/etc/kubernetes/worker/pki/cert-{{ inventory_hostname }}.pem"
+        mode: "0640"
+      - path: "/etc/kubernetes/worker/pki/cert-{{ inventory_hostname }}-key.pem"
+        mode: "0640"
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Ensure kubelet service is running and enabled
+      ansible.builtin.assert:
+        that:
+          - "'kubelet.service' in ansible_facts.services"
+          - ansible_facts.services['kubelet.service'].state == 'running'
+          - ansible_facts.services['kubelet.service'].status == 'enabled'
+
+    - name: Ensure kube-proxy service is running and enabled
+      ansible.builtin.assert:
+        that:
+          - "'kube-proxy.service' in ansible_facts.services"
+          - ansible_facts.services['kube-proxy.service'].state == 'running'
+          - ansible_facts.services['kube-proxy.service'].status == 'enabled'
+
+    - name: Gather required file metadata
+      ansible.builtin.stat:
+        path: "{{ item.path }}"
+      loop: "{{ mol__worker_required_files }}"
+      register: mol__worker_required_file_stats
+
+    - name: Ensure required files exist and have expected permissions
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.mode == item.item.mode
+      loop: "{{ mol__worker_required_file_stats.results }}"
+
+    - name: Gather worker PKI file metadata
+      ansible.builtin.stat:
+        path: "{{ item.path }}"
+      loop: "{{ mol__worker_required_pki_files }}"
+      register: mol__worker_required_pki_file_stats
+
+    - name: Ensure worker certificates/keys exist and have expected permissions
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.mode == item.item.mode
+      loop: "{{ mol__worker_required_pki_file_stats.results }}"
+
+    - name: Gather metadata for sensitive auth files
+      ansible.builtin.stat:
+        path: "{{ item.path }}"
+      loop: "{{ mol__worker_sensitive_auth_files }}"
+      register: mol__worker_sensitive_auth_file_stats
+
+    - name: Ensure sensitive auth files are root-owned and not world-readable
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.mode == item.item.mode
+          - item.stat.pw_name == 'root'
+          - item.stat.gr_name == 'root'
+          - item.stat.mode[3] == '0'
+      loop: "{{ mol__worker_sensitive_auth_file_stats.results }}"
+
+    - name: Read kubelet systemd unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/kubelet.service
+      register: mol__kubelet_unit
+
+    - name: Read kube-proxy systemd unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/kube-proxy.service
+      register: mol__kubeproxy_unit
+
+    - name: Ensure kubelet unit uses role-managed config paths
+      ansible.builtin.assert:
+        that:
+          - "'--config=/etc/kubernetes/worker/kubelet/kubelet-config.yaml' in (mol__kubelet_unit.content | b64decode)"
+          - "'--kubeconfig=/etc/kubernetes/worker/kubelet/kubeconfig' in (mol__kubelet_unit.content | b64decode)"
+
+    - name: Ensure kube-proxy unit uses role-managed config path
+      ansible.builtin.assert:
+        that:
+          - "'--config=/etc/kubernetes/worker/kube-proxy/kubeproxy-config.yaml' in (mol__kubeproxy_unit.content | b64decode)"
+
+    - name: Read kube-proxy config
+      ansible.builtin.slurp:
+        src: /etc/kubernetes/worker/kube-proxy/kubeproxy-config.yaml
+      register: mol__kubeproxy_config_raw
+
+    - name: Read kubelet config
+      ansible.builtin.slurp:
+        src: /etc/kubernetes/worker/kubelet/kubelet-config.yaml
+      register: mol__kubelet_config_raw
+
+    - name: Parse kube-proxy config
+      ansible.builtin.set_fact:
+        mol__kubeproxy_config: "{{ mol__kubeproxy_config_raw.content | b64decode | from_yaml }}"
+
+    - name: Parse kubelet config
+      ansible.builtin.set_fact:
+        mol__kubelet_config: "{{ mol__kubelet_config_raw.content | b64decode | from_yaml }}"
+
+    - name: Ensure kubelet role configuration is applied
+      ansible.builtin.assert:
+        that:
+          - mol__kubelet_config.kind == 'KubeletConfiguration'
+          - mol__kubelet_config.apiVersion == 'kubelet.config.k8s.io/v1beta1'
+          - mol__kubelet_config.authentication.x509.clientCAFile == '/etc/kubernetes/worker/pki/ca-k8s-apiserver.pem'
+          - mol__kubelet_config.healthzPort == 10248
+          - mol__kubelet_config.containerRuntimeEndpoint == 'unix:///run/containerd/containerd.sock'
+          - mol__kubelet_config.cgroupDriver is defined
+          - mol__kubelet_config.tlsCertFile == '/etc/kubernetes/worker/pki/cert-' + inventory_hostname + '.pem'
+          - mol__kubelet_config.tlsPrivateKeyFile == '/etc/kubernetes/worker/pki/cert-' + inventory_hostname + '-key.pem'
+
+    - name: Ensure kube-proxy role configuration is applied
+      ansible.builtin.assert:
+        that:
+          - mol__kubeproxy_config.kind == 'KubeProxyConfiguration'
+          - mol__kubeproxy_config.apiVersion == 'kubeproxy.config.k8s.io/v1alpha1'
+          - mol__kubeproxy_config.clientConnection.kubeconfig == '/etc/kubernetes/worker/kube-proxy/kubeconfig'
+          - mol__kubeproxy_config.mode is defined
+
+    - name: Load role default variables
+      ansible.builtin.include_vars:
+        file: "../../defaults/main.yml"
+        name: mol__role_defaults
+
+    - name: Register expected Kubernetes version from role defaults
+      ansible.builtin.set_fact:
+        mol__expected_k8s_version: "v{{ mol__role_defaults.k8s_worker_release }}"
+
+    - name: Fetch kubelet version
+      ansible.builtin.command:
+        argv:
+          - kubelet
+          - --version
+      register: mol__kubelet_version_cmd
+      changed_when: false
+
+    - name: Fetch kube-proxy version
+      ansible.builtin.command:
+        argv:
+          - kube-proxy
+          - --version
+      register: mol__kubeproxy_version_cmd
+      changed_when: false
+
+    - name: Fetch kubectl client version
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - version
+          - --client
+          - --output=json
+      register: mol__kubectl_version_cmd
+      changed_when: false
+
+    - name: Parse binary versions
+      ansible.builtin.set_fact:
+        mol__kubelet_version: "{{ mol__kubelet_version_cmd.stdout | regex_search('v[0-9]+\\.[0-9]+\\.[0-9]+') }}"
+        mol__kubeproxy_version: "{{ mol__kubeproxy_version_cmd.stdout | regex_search('v[0-9]+\\.[0-9]+\\.[0-9]+') }}"
+        mol__kubectl_version: "{{ (mol__kubectl_version_cmd.stdout | from_json).clientVersion.gitVersion }}"
+
+    - name: Ensure worker binary versions match role release
+      ansible.builtin.assert:
+        that:
+          - mol__kubelet_version == mol__expected_k8s_version
+          - mol__kubeproxy_version == mol__expected_k8s_version
+          - mol__kubectl_version == mol__expected_k8s_version
+
 - name: Verify setup
   hosts: test-assets
   remote_user: vagrant
+  vars:
+    mol__smoke_namespace: "molecule-smoke"
+    mol__smoke_app_name: "nginx-smoke"
+    mol__run_scheduling_check: false
   tasks:
     - name: Fetch namespaces information
       kubernetes.core.k8s_info:
@@ -30,3 +258,228 @@
       ansible.builtin.assert:
         that:
           - k8s__namespaces_count|int >= 4
+
+    - name: Ensure all expected worker nodes appear in kubectl get nodes
+      ansible.builtin.command: >
+        kubectl --kubeconfig {{ k8s_admin_conf_dir }}/admin.kubeconfig get node {{ item }} --no-headers
+      loop: "{{ groups['k8s_worker'] }}"
+      changed_when: false
+
+    - name: Fetch worker node Ready condition from kubectl
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - --kubeconfig
+          - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+          - get
+          - node
+          - "{{ item }}"
+          - -o
+          - 'jsonpath={.status.conditions[?(@.type=="Ready")].status}'
+      loop: "{{ groups['k8s_worker'] }}"
+      register: mol__kubectl_node_ready
+      changed_when: false
+
+    - name: Ensure all expected worker nodes are Ready
+      ansible.builtin.assert:
+        that:
+          - item.stdout == "True"
+        fail_msg: "Worker node {{ item.item }} is not Ready"
+      loop: "{{ mol__kubectl_node_ready.results }}"
+
+    - name: Detect Cilium DaemonSet readiness
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - --kubeconfig
+          - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+          - -n
+          - cilium
+          - get
+          - daemonset
+          - cilium
+          - -o
+          - jsonpath={.status.numberReady}/{.status.desiredNumberScheduled}
+      register: mol__cilium_daemonset_status
+      changed_when: false
+      failed_when: false
+
+    - name: Register whether smoke tests should run
+      ansible.builtin.set_fact:
+        mol__run_smoke_tests: >-
+          {{
+            mol__cilium_daemonset_status.rc == 0
+            and (mol__cilium_daemonset_status.stdout | trim) is match('^[0-9]+/[0-9]+$')
+            and ((mol__cilium_daemonset_status.stdout | trim).split('/')[1] | int) > 0
+            and ((mol__cilium_daemonset_status.stdout | trim).split('/')[0] | int) == ((mol__cilium_daemonset_status.stdout | trim).split('/')[1] | int)
+          }}
+
+    - name: Show smoke-test gating status
+      ansible.builtin.debug:
+        msg: >-
+          Cilium ready={{ mol__run_smoke_tests }} (raw status: {{ mol__cilium_daemonset_status.stdout | default('n/a') | trim }})
+      when: ansible_verbosity > 0
+
+    - name: Run workload smoke tests when networking is installed
+      when: mol__run_smoke_tests | bool
+      block:
+        - name: Ensure old smoke-test resources are absent
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - --kubeconfig
+              - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+              - delete
+              - namespace
+              - "{{ mol__smoke_namespace }}"
+              - --ignore-not-found=true
+              - --wait=true
+              - --timeout=180s
+          changed_when: false
+
+        - name: Ensure smoke-test namespace exists
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - --kubeconfig
+              - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+              - apply
+              - -f
+              - '-'
+          changed_when: false
+          args:
+            stdin: |
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: {{ mol__smoke_namespace }}
+
+        - name: Deploy nginx smoke workload and ClusterIP service
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - --kubeconfig
+              - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+              - apply
+              - -f
+              - '-'
+          changed_when: false
+          args:
+            stdin: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: {{ mol__smoke_app_name }}
+                namespace: {{ mol__smoke_namespace }}
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    app: {{ mol__smoke_app_name }}
+                template:
+                  metadata:
+                    labels:
+                      app: {{ mol__smoke_app_name }}
+                  spec:
+                    containers:
+                      - name: nginx
+                        image: nginx:1.27-alpine
+                        ports:
+                          - containerPort: 80
+              ---
+              apiVersion: v1
+              kind: Service
+              metadata:
+                name: {{ mol__smoke_app_name }}
+                namespace: {{ mol__smoke_namespace }}
+              spec:
+                type: ClusterIP
+                selector:
+                  app: {{ mol__smoke_app_name }}
+                ports:
+                  - port: 80
+                    targetPort: 80
+                    protocol: TCP
+
+        - name: Wait for nginx smoke deployment rollout
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - --kubeconfig
+              - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+              - -n
+              - "{{ mol__smoke_namespace }}"
+              - rollout
+              - status
+              - "deployment/{{ mol__smoke_app_name }}"
+              - --timeout=180s
+          changed_when: false
+
+        - name: Wait for nginx smoke service endpoints
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - --kubeconfig
+              - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+              - -n
+              - "{{ mol__smoke_namespace }}"
+              - get
+              - endpoints
+              - "{{ mol__smoke_app_name }}"
+              - -o
+              - jsonpath={.subsets[*].addresses[*].ip}
+          register: mol__smoke_endpoints
+          changed_when: false
+          retries: 18
+          delay: 10
+          until: (mol__smoke_endpoints.stdout | trim) != ''
+
+        - name: In-cluster HTTP check against nginx smoke service DNS
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - --kubeconfig
+              - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+              - -n
+              - "{{ mol__smoke_namespace }}"
+              - run
+              - smoke-curl
+              - --image=curlimages/curl:8.12.1
+              - --restart=Never
+              - --rm
+              - --attach
+              - --command
+              - --
+              - sh
+              - -ec
+              - >-
+                code="$(curl -sS -o /dev/null -w '%{http_code}'
+                'http://{{ mol__smoke_app_name }}.{{ mol__smoke_namespace }}.svc.cluster.local')";
+                test "$code" = "200"
+          changed_when: false
+
+        - name: Fetch node names for nginx smoke pods
+          when: mol__run_scheduling_check | bool
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - --kubeconfig
+              - "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+              - -n
+              - "{{ mol__smoke_namespace }}"
+              - get
+              - pod
+              - -l
+              - "app={{ mol__smoke_app_name }}"
+              - -o
+              - jsonpath={.items[*].spec.nodeName}
+          register: mol__smoke_pod_node_names
+          changed_when: false
+
+        - name: Ensure nginx smoke pods are scheduled on worker nodes (optional)
+          when: mol__run_scheduling_check | bool
+          ansible.builtin.assert:
+            that:
+              - item in groups['k8s_worker']
+            fail_msg: "Smoke pod scheduled on unexpected node {{ item }}"
+          loop: "{{ mol__smoke_pod_node_names.stdout.split() }}"

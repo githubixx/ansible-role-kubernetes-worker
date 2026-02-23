@@ -4,7 +4,7 @@ This Ansible role is used in [Kubernetes the not so hard way with Ansible - Work
 
 ## Versions
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `30.0.0+1.33.6` means this is release `30.0.0` of this role and it's meant to be used with Kubernetes version `1.33.6` (but should work with any K8s 1.33.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `31.0.0+1.34.4` means this is release `31.0.0` of this role and it's meant to be used with Kubernetes version `1.34.4` (but should work with any K8s 1.34.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
 
 ## Requirements
 
@@ -26,6 +26,18 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 **IMPORTANT** Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
 
 **Recent changes:**
+
+## 31.0.0+1.34.4
+
+- **UPDATE**
+  - update `k8s_ctl_release` to `1.34.4`
+
+- **OTHER**
+  - replace injected `ansible_*` facts usage with `ansible_facts[...]` (prepares for ansible-core 2.24 where `INJECT_FACTS_AS_VARS` default changes)
+
+- **MOLECULE**
+  - use own [githubixx Vagrant boxes](https://portal.cloud.hashicorp.com/vagrant/discover/githubixx)
+  - add more checks in `verify.yml`
 
 ## 30.0.0+1.33.6
 
@@ -99,7 +111,7 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 roles:
   - name: githubixx.kubernetes_worker
     src: https://github.com/githubixx/ansible-role-kubernetes-worker.git
-    version: 30.0.0+1.33.6
+    version: 31.0.0+1.34.4
 ```
 
 ## Role Variables
@@ -127,7 +139,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.33.6"
+k8s_worker_release: "1.34.4"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -166,7 +178,7 @@ k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
 # variable of https://github.com/githubixx/ansible-role-kubernetes-ca
 # role). If it's not specified you'll get certificate errors in the
 # logs of the services mentioned above.
-k8s_worker_api_endpoint_host: "{% set controller_host = groups['k8s_controller'][0] %}{{ hostvars[controller_host]['ansible_' + hostvars[controller_host]['k8s_interface']].ipv4.address }}"
+k8s_worker_api_endpoint_host: "{% set controller_host = groups['k8s_controller'][0] %}{{ hostvars[controller_host]['ansible_facts'][hostvars[controller_host]['k8s_interface']]['ipv4']['address'] }}"
 
 # As above just for the port. It specifies on which port the
 # Kubernetes API servers are listening. Again if there is a loadbalancer
@@ -203,14 +215,14 @@ k8s_worker_kubelet_conf_dir: "{{ k8s_worker_conf_dir }}/kubelet"
 # https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads
 k8s_worker_kubelet_settings:
   "config": "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
-  "node-ip": "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
+  "node-ip": "{{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}"
   "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
 
 # kubelet kubeconfig
 k8s_worker_kubelet_conf_yaml: |
   kind: KubeletConfiguration
   apiVersion: kubelet.config.k8s.io/v1beta1
-  address: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}
+  address: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}
   authentication:
     anonymous:
       enabled: false
@@ -224,7 +236,7 @@ k8s_worker_kubelet_conf_yaml: |
   clusterDNS:
     - "10.32.0.254"
   failSwapOn: true
-  healthzBindAddress: "{{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}"
+  healthzBindAddress: "{{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}"
   healthzPort: 10248
   runtimeRequestTimeout: "15m"
   serializeImagePulls: false
@@ -244,10 +256,10 @@ k8s_worker_kubeproxy_settings:
 k8s_worker_kubeproxy_conf_yaml: |
   kind: KubeProxyConfiguration
   apiVersion: kubeproxy.config.k8s.io/v1alpha1
-  bindAddress: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}
+  bindAddress: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}
   clientConnection:
     kubeconfig: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
-  healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_' + k8s_interface].ipv4.address }}:10256
+  healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}:10256
   mode: "ipvs"
   ipvs:
     minSyncPeriod: 0s
