@@ -52,6 +52,43 @@
           - item.stat.mode == item.item.mode
       loop: "{{ mol__worker_required_file_stats.results }}"
 
+    - name: Read kubelet systemd unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/kubelet.service
+      register: mol__kubelet_unit
+
+    - name: Read kube-proxy systemd unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/kube-proxy.service
+      register: mol__kubeproxy_unit
+
+    - name: Ensure kubelet unit uses role-managed config paths
+      ansible.builtin.assert:
+        that:
+          - "'--config=/etc/kubernetes/worker/kubelet/kubelet-config.yaml' in (mol__kubelet_unit.content | b64decode)"
+          - "'--kubeconfig=/etc/kubernetes/worker/kubelet/kubeconfig' in (mol__kubelet_unit.content | b64decode)"
+
+    - name: Ensure kube-proxy unit uses role-managed config path
+      ansible.builtin.assert:
+        that:
+          - "'--config=/etc/kubernetes/worker/kube-proxy/kubeproxy-config.yaml' in (mol__kubeproxy_unit.content | b64decode)"
+
+    - name: Read kube-proxy config
+      ansible.builtin.slurp:
+        src: /etc/kubernetes/worker/kube-proxy/kubeproxy-config.yaml
+      register: mol__kubeproxy_config_raw
+
+    - name: Parse kube-proxy config
+      ansible.builtin.set_fact:
+        mol__kubeproxy_config: "{{ mol__kubeproxy_config_raw.content | b64decode | from_yaml }}"
+
+    - name: Ensure kube-proxy role configuration is applied
+      ansible.builtin.assert:
+        that:
+          - mol__kubeproxy_config.kind == 'KubeProxyConfiguration'
+          - mol__kubeproxy_config.apiVersion == 'kubeproxy.config.k8s.io/v1alpha1'
+          - mol__kubeproxy_config.clientConnection.kubeconfig == '/etc/kubernetes/worker/kube-proxy/kubeconfig'
+
 - name: Verify setup
   hosts: test-assets
   remote_user: vagrant
