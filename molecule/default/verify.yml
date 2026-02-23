@@ -78,9 +78,30 @@
         src: /etc/kubernetes/worker/kube-proxy/kubeproxy-config.yaml
       register: mol__kubeproxy_config_raw
 
+    - name: Read kubelet config
+      ansible.builtin.slurp:
+        src: /etc/kubernetes/worker/kubelet/kubelet-config.yaml
+      register: mol__kubelet_config_raw
+
     - name: Parse kube-proxy config
       ansible.builtin.set_fact:
         mol__kubeproxy_config: "{{ mol__kubeproxy_config_raw.content | b64decode | from_yaml }}"
+
+    - name: Parse kubelet config
+      ansible.builtin.set_fact:
+        mol__kubelet_config: "{{ mol__kubelet_config_raw.content | b64decode | from_yaml }}"
+
+    - name: Ensure kubelet role configuration is applied
+      ansible.builtin.assert:
+        that:
+          - mol__kubelet_config.kind == 'KubeletConfiguration'
+          - mol__kubelet_config.apiVersion == 'kubelet.config.k8s.io/v1beta1'
+          - mol__kubelet_config.authentication.x509.clientCAFile == '/etc/kubernetes/worker/pki/ca-k8s-apiserver.pem'
+          - mol__kubelet_config.healthzPort == 10248
+          - mol__kubelet_config.containerRuntimeEndpoint == 'unix:///run/containerd/containerd.sock'
+          - mol__kubelet_config.cgroupDriver is defined
+          - mol__kubelet_config.tlsCertFile == '/etc/kubernetes/worker/pki/cert-' + inventory_hostname + '.pem'
+          - mol__kubelet_config.tlsPrivateKeyFile == '/etc/kubernetes/worker/pki/cert-' + inventory_hostname + '-key.pem'
 
     - name: Ensure kube-proxy role configuration is applied
       ansible.builtin.assert:
@@ -88,6 +109,7 @@
           - mol__kubeproxy_config.kind == 'KubeProxyConfiguration'
           - mol__kubeproxy_config.apiVersion == 'kubeproxy.config.k8s.io/v1alpha1'
           - mol__kubeproxy_config.clientConnection.kubeconfig == '/etc/kubernetes/worker/kube-proxy/kubeconfig'
+          - mol__kubeproxy_config.mode is defined
 
 - name: Verify setup
   hosts: test-assets
