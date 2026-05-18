@@ -1,5 +1,17 @@
 # Changelog
 
+## 32.0.0+1.35.5
+
+- **BREAKING**
+  - Kubernetes v1.35+ requires worker hosts to use cgroup v2 by default. This role does not manage the host cgroup mode.
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.35.5`
+
+- **OTHER**
+  - keep `kube-proxy` default mode `ipvs` although Kubernetes v1.35 deprecates it. This will change with the next release of this role and then default to `nftables`. Also see [NFTables mode for kube-proxy](https://kubernetes.io/blog/2025/02/28/nftables-kube-proxy/).
+  - document that user supplied kubelet flags must not add the removed `--pod-infra-container-image` option
+
 ## 31.0.0+1.34.4
 
 - **UPDATE**
