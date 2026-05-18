@@ -4,13 +4,15 @@ This Ansible role is used in [Kubernetes the not so hard way with Ansible - Work
 
 ## Versions
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `31.0.0+1.34.4` means this is release `31.0.0` of this role and it's meant to be used with Kubernetes version `1.34.4` (but should work with any K8s 1.34.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `32.0.0+1.35.5` means this is release `32.0.0` of this role and it's meant to be used with Kubernetes version `1.35.5` (but should work with any K8s 1.35.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
 
 ## Requirements
 
 This playbook expects that you already have rolled out the Kubernetes controller components (see [kubernetes-controller](https://github.com/githubixx/ansible-role-kubernetes-controller) and [Kubernetes the not so hard way with Ansible - Control plane](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-control-plane/).
 
 You also need [containerd](https://github.com/githubixx/ansible-role-containerd), [CNI plugins](https://github.com/githubixx/ansible-role-cni) and [runc](https://github.com/githubixx/ansible-role-runc) installed. To enable Kubernetes `Pods` to communicate between different hosts it makes sense to install [Cilium](https://galaxy.ansible.com/githubixx/cilium_kubernetes) later once the worker nodes are running e.g. Of course `Calico`, `WeaveNet`, `kube-router` or [flannel](https://galaxy.ansible.com/githubixx/flanneld) or other Kubernetes network solutions are valid options.
+
+For Kubernetes `1.35.x` worker hosts should use cgroup v2. This role configures kubelet for the `systemd` cgroup driver, but it does not change the host cgroup mode.
 
 ## Supported OS
 
@@ -26,6 +28,18 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 **IMPORTANT** Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
 
 **Recent changes:**
+
+## 32.0.0+1.35.5
+
+- **BREAKING**
+  - Kubernetes v1.35+ requires worker hosts to use cgroup v2 by default. This role does not manage the host cgroup mode.
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.35.5`
+
+- **OTHER**
+  - keep `kube-proxy` default mode `ipvs` although Kubernetes v1.35 deprecates it. This will change with the next release of this role and then default to `nftables`. Also see [NFTables mode for kube-proxy](https://kubernetes.io/blog/2025/02/28/nftables-kube-proxy/).
+  - document that user supplied kubelet flags must not add the removed `--pod-infra-container-image` option
 
 ## 31.0.0+1.34.4
 
@@ -111,7 +125,7 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 roles:
   - name: githubixx.kubernetes_worker
     src: https://github.com/githubixx/ansible-role-kubernetes-worker.git
-    version: 31.0.0+1.34.4
+    version: 32.0.0+1.35.5
 ```
 
 ## Role Variables
@@ -139,7 +153,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.34.4"
+k8s_worker_release: "1.35.5"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -219,6 +233,14 @@ k8s_worker_kubelet_settings:
   "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
 
 # kubelet kubeconfig
+#
+# NOTE: Kubernetes v1.35+ no longer starts with cgroup v1 by default. This
+# role configures kubelet for the systemd cgroup driver but does not manage the
+# host cgroup mode itself, so worker hosts should use cgroup v2.
+#
+# Also note that this role does not add the removed kubelet
+# "--pod-infra-container-image" flag by default. If you use
+# "k8s_worker_kubelet_settings_user" do not add that flag on Kubernetes v1.35+.
 k8s_worker_kubelet_conf_yaml: |
   kind: KubeletConfiguration
   apiVersion: kubelet.config.k8s.io/v1beta1
@@ -260,6 +282,8 @@ k8s_worker_kubeproxy_conf_yaml: |
   clientConnection:
     kubeconfig: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
   healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}:10256
+  # Kubernetes v1.35 deprecates IPVS mode, but this role keeps it as the
+  # default for backwards compatibility for now until next major release.
   mode: "ipvs"
   ipvs:
     minSyncPeriod: 0s

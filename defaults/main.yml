@@ -21,7 +21,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.34.4"
+k8s_worker_release: "1.35.5"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -101,6 +101,14 @@ k8s_worker_kubelet_settings:
   "kubeconfig": "{{ k8s_worker_kubelet_conf_dir }}/kubeconfig"
 
 # kubelet kubeconfig
+#
+# NOTE: Kubernetes v1.35+ no longer starts with cgroup v1 by default. This
+# role configures kubelet for the systemd cgroup driver but does not manage the
+# host cgroup mode itself, so worker hosts should use cgroup v2.
+#
+# Also note that this role does not add the removed kubelet
+# "--pod-infra-container-image" flag by default. If you use
+# "k8s_worker_kubelet_settings_user" do not add that flag on Kubernetes v1.35+.
 k8s_worker_kubelet_conf_yaml: |
   kind: KubeletConfiguration
   apiVersion: kubelet.config.k8s.io/v1beta1
@@ -142,6 +150,8 @@ k8s_worker_kubeproxy_conf_yaml: |
   clientConnection:
     kubeconfig: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
   healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}:10256
+  # Kubernetes v1.35 deprecates IPVS mode, but this role keeps it as the
+  # default for backwards compatibility for now until next major release.
   mode: "ipvs"
   ipvs:
     minSyncPeriod: 0s
