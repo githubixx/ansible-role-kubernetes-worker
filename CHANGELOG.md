@@ -1,5 +1,69 @@
 # Changelog
 
+## 33.0.0+1.36.6
+
+- **BREAKING**
+  - require containerd 2.x before provisioning workers; containerd 1.x is no longer supported by this role
+  - default kube-proxy to `nftables` instead of deprecated `ipvs`, as announced in the previous release
+  - `nftables` mode requires Linux kernel 5.13+ and nft 1.0.0+; NodePorts default to primary node addresses and require explicit host firewall allowances
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.36.6`
+  - add Ubuntu 26.04 support and install nftables tooling
+  - preserve the existing masquerading policy, explicitly select primary node addresses for NodePorts, and use upstream nftables synchronization intervals (`minSyncPeriod: 1s`, `syncPeriod: 30s`)
+  - restart `kubelet` and `kube-proxy` when their configuration files change
+
+- **MOLECULE**
+  - cover Ubuntu 26.04 on a controller and a dedicated worker; align controller and assets-host kubectl with Kubernetes 1.36.6
+  - include idempotence and verify in the test sequence; install networking, DNS, and persistent smoke fixtures during converge
+  - disable Cilium kube-proxy replacement and socket load balancing so service checks exercise kube-proxy
+  - install CoreDNS through `githubixx.coredns`, preserving the DNS Service address and Corefile; prepare Helm 3 and Helm-diff on the assets host
+  - verify runtime dependencies, worker versions, health endpoints, nftables rules, fine-grained kubelet RBAC, cross-node service traffic, DNS, NodePorts, and exec streaming without creating or deleting workloads
+
+- **UPGRADE NOTES**
+  - upgrade the control plane first; controller role `31.0.0+1.36.6` includes the fine-grained kubelet authorization permissions that became stable in Kubernetes 1.36
+  - upgrade containerd to 2.x and configure its runc runtime with `SystemdCgroup = true`; keep cgroup v2 and the systemd cgroup driver
+  - preserve kubelet TLS and webhook authorization for direct WebSocket streaming; regenerate embedded kubeconfig certificates when rotating their CA
+  - custom `k8s_worker_kubeproxy_conf_yaml` values are not rewritten; see the upgrade instructions below for migration and an explicit IPVS override
+
+### Upgrading to 33.0.0+1.36.6
+
+1. Upgrade the control plane first, using controller role `31.0.0+1.36.6` or newer with the Kubernetes 1.36 kubelet RBAC permissions.
+2. Check cgroup v2, kernel and nft versions, CNI compatibility, and firewall rules before migrating.
+3. Drain one worker at a time, apply this role, confirm kubelet/kube-proxy health and service connectivity, then uncordon the node. Repeat for the remaining workers.
+
+Changing the managed configuration restarts the corresponding service. On restart, kube-proxy handles migration between IPVS and nftables rules; this role does not flush host firewall rules or reboot nodes. Custom `k8s_worker_kubeproxy_conf_yaml` values remain authoritative and must be migrated explicitly.
+
+The nftables configuration uses the upstream synchronization defaults: `minSyncPeriod: 1s` batches rapid Service/EndpointSlice changes, while `syncPeriod: 30s` controls periodic reconciliation and cleanup; endpoint changes do not wait for that 30-second interval. `masqueradeAll: true` retains the role's existing SNAT behavior. Ensure `clusterCIDR` matches your actual Pod network before considering a different masquerading policy.
+
+In nftables mode, this role explicitly sets `nodePortAddresses: [primary]`, restricting NodePorts to the node's primary addresses, not every local interface. On WireGuard deployments, check the registered node `InternalIP` and override `nodePortAddresses` with specific CIDRs if other interfaces must accept NodePorts. nftables mode does not automatically open NodePorts through the host firewall: permit only the required ports and networks. Localhost NodePorts are not supported. See [upstream migration guidance](https://v1-36.docs.kubernetes.io/docs/reference/networking/virtual-ips/#migrating-from-iptables-mode-to-nftables) for additional differences, including conntrack behavior on older kernels. `conntrack.tcpBeLiberal` remains unset; enable that workaround only if diagnostics show it is needed.
+
+To postpone migration or revert the backend while retaining Kubernetes 1.36.6, override the complete configuration with:
+
+```yaml
+k8s_worker_kubeproxy_conf_yaml: |
+  kind: KubeProxyConfiguration
+  apiVersion: kubeproxy.config.k8s.io/v1alpha1
+  bindAddress: {{ ansible_facts[k8s_interface]['ipv4']['address'] }}
+  clientConnection:
+    kubeconfig: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
+  healthzBindAddress: {{ ansible_facts[k8s_interface]['ipv4']['address'] }}:10256
+  mode: "ipvs"
+  ipvs:
+    minSyncPeriod: 0s
+    scheduler: ""
+    syncPeriod: 2s
+  iptables:
+    masqueradeAll: true
+  clusterCIDR: "10.200.0.0/16"
+```
+
+Adjust the CIDR and paths to your deployment. IPVS remains available in Kubernetes 1.36 but is deprecated; no obsolete feature gate is needed to select nftables.
+
+Fine-grained kubelet authorization is stable in 1.36. Keep kubelet webhook authorization, TLS certificates, and the controller-managed API-server-to-kubelet permissions. Direct WebSocket exec/attach/port-forward streaming is enabled by default for supporting kubelets. File-based client-CA reload does not rotate certificates embedded in kubeconfigs; rerun kubeconfig generation when rotating their CA.
+
+For migration testing, temporarily put the IPVS override above in `molecule/default/group_vars/all.yml`, then run converge and verify. Remove the override and repeat those steps to test the configuration-only transition to nftables with unchanged binaries. For a version upgrade test, also set `k8s_worker_release: "1.35.5"` during the initial IPVS pass and remove it before the nftables pass.
+
 ## 32.0.0+1.35.5
 
 - **BREAKING**

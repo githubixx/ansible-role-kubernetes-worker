@@ -7,9 +7,12 @@
   become: true
   gather_facts: true
   tasks:
+    - name: Check worker dependencies before converge
+      ansible.builtin.include_tasks:
+        file: tasks/dependency_readiness.yml
+
     - name: Setup Kubernetes worker
-      when:
-        - k8s_worker_setup_networking is not defined
+      when: k8s_worker_setup_networking | default('skip') != 'install'
       ansible.builtin.include_role:
         name: githubixx.kubernetes_worker
 
@@ -21,13 +24,12 @@
     K8S_AUTH_KUBECONFIG: "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
   tasks:
     - name: Include Cilium role
-      when:
-        - k8s_worker_setup_networking is defined
-        - k8s_worker_setup_networking == "install"
+      when: k8s_worker_setup_networking | default('install') == 'install'
       ansible.builtin.include_role:
         name: githubixx.cilium_kubernetes
       vars:
         cilium_action: "install"  # noqa var-naming
+        cilium_chart_values_directory: "{{ playbook_dir }}/templates"  # noqa var-naming
 
 - name: Setup tooling to make worker nodes usable
   hosts: test-assets
@@ -37,9 +39,7 @@
     K8S_AUTH_KUBECONFIG: "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
   tasks:
     - name: Setup tooling
-      when:
-        - k8s_worker_setup_networking is defined
-        - k8s_worker_setup_networking == "install"
+      when: k8s_worker_setup_networking | default('install') == 'install'
       block:
         - name: Waiting for Cilium to become ready
           ansible.builtin.include_tasks:
@@ -50,9 +50,32 @@
             file: tasks/taint_controller_nodes.yml
 
         - name: Install CoreDNS
-          ansible.builtin.include_tasks:
-            file: tasks/coredns.yml
+          ansible.builtin.include_role:
+            name: githubixx.coredns
+          vars:
+            ansible_become: false
 
         - name: Waiting for CoreDNS to become ready
           ansible.builtin.include_tasks:
             file: tasks/coredns_status.yml
+
+        - name: Create smoke-test fixtures
+          kubernetes.core.k8s:
+            state: present
+            definition: "{{ lookup('template', 'templates/smoke.yml.j2') | from_yaml_all | list }}"
+
+        - name: Wait for smoke-test workloads
+          ansible.builtin.command:
+            argv:
+              - kubectl
+              - "--kubeconfig={{ k8s_admin_conf_dir }}/admin.kubeconfig"
+              - -n
+              - "{{ mol__smoke_namespace }}"
+              - rollout
+              - status
+              - "{{ item }}"
+              - --timeout=300s
+          loop:
+            - "deployment/{{ mol__smoke_app_name }}"
+            - daemonset/smoke-client
+          changed_when: false
