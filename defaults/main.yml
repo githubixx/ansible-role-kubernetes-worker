@@ -21,7 +21,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.35.5"
+k8s_worker_release: "1.36.6"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -78,6 +78,7 @@ k8s_worker_os_packages:
   - ipset
   - conntrack
   - iptables
+  - nftables
   - iptstate
   - netstat-nat
   - socat
@@ -150,13 +151,11 @@ k8s_worker_kubeproxy_conf_yaml: |
   clientConnection:
     kubeconfig: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
   healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}:10256
-  # Kubernetes v1.35 deprecates IPVS mode, but this role keeps it as the
-  # default for backwards compatibility for now until next major release.
-  mode: "ipvs"
-  ipvs:
-    minSyncPeriod: 0s
-    scheduler: ""
-    syncPeriod: 2s
-  iptables:
+  mode: "nftables"
+  nodePortAddresses:
+    - primary
+  nftables:
+    minSyncPeriod: 1s
+    syncPeriod: 30s
     masqueradeAll: true
   clusterCIDR: "10.200.0.0/16"

@@ -56,7 +56,7 @@ platforms:
         type: static
         ip: 172.16.10.20
   - name: test-controller3
-    box: githubixx/ubuntu-24.04
+    box: githubixx/ubuntu-26.04
     memory: 2048
     cpus: 2
     groups:
@@ -133,6 +133,20 @@ platforms:
         network_name: private_network
         type: static
         ip: 172.16.10.210
+  - name: test-worker3
+    box: githubixx/ubuntu-26.04
+    memory: 2048
+    cpus: 2
+    groups:
+      - vpn
+      - ubuntu26
+      - k8s_worker
+      - k8s
+    interfaces:
+      - auto_config: true
+        network_name: private_network
+        type: static
+        ip: 172.16.10.220
 
 provisioner:
   name: ansible
@@ -145,8 +159,12 @@ provisioner:
 scenario:
   name: default
   test_sequence:
+    - dependency
+    - create
     - prepare
     - converge
+    - idempotence
+    - verify
 
 verifier:
   name: ansible

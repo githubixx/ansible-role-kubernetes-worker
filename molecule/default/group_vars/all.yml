@@ -75,6 +75,10 @@ k8s_ca_certificate_group: "vagrant"
 
 # Interface where the Kubernetes control plane services are listening on.
 k8s_interface: "wg0"
+
+# Keep test dependencies aligned with the worker release.
+k8s_ctl_release: "1.36.6"
+
 # Interface where the etcd daemons listening on.
 k8s_ctl_etcd_interface: "{{ etcd_interface }}"
 
@@ -91,17 +95,20 @@ k8s_ctl_ca_conf_directory: "{{ k8s_ca_conf_directory }}"
 # The name of the Kubernetes cluster.
 k8s_config_cluster_name: "k8s"
 
+# Keep test dependencies aligned with the worker release.
+kubectl_version: "1.36.6"
+
 # Directory where "admin.kubeconfig" (the credentials file) for the "admin"
 # user is stored
-k8s_admin_conf_dir: "{{ '~/k8s/configs' | expanduser }}"
+k8s_admin_conf_dir: "/home/vagrant/k8s/configs"
 # Permissions for the directory specified in "k8s_admin_conf_dir"
 k8s_admin_conf_dir_perm: "0700"
 # Owner of the directory specified in "k8s_admin_conf_dir" and for
 # "admin.kubeconfig" stored in this directory.
-k8s_admin_conf_owner: "root"
+k8s_admin_conf_owner: "vagrant"
 # Group of the directory specified in "k8s_admin_conf_dir" and for
 # "admin.kubeconfig" stored in this directory.
-k8s_admin_conf_group: "root"
+k8s_admin_conf_group: "vagrant"
 
 # Run Kubernetes control plane services as the following user.
 k8s_run_as_user: "k8s"
@@ -116,6 +123,9 @@ k8s_encryption_config_key: "Y29uZmlndXJhdGlvbjIyCg=="
 k8s_apiserver_settings_user:
   "enable-aggregator-routing": "true"
 
+# Provide the kube-proxy config path to verification without running the worker role.
+k8s_worker_kubeproxy_conf_dir: "/etc/kubernetes/worker/kube-proxy"
+
 k8s_worker_kubelet_settings:
   "config": "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
   "node-ip": "{{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}"
@@ -128,6 +138,9 @@ runc_bin_directory: "/usr/local/sbin"
 # Directory to store the "containerd" archive after download
 containerd_tmp_directory: "/tmp"
 
+# Cilium version to use for the Helm chart
+cilium_chart_version: "1.19.10"
+
 # Don't use "etcd" for Cilium
 cilium_etcd_enabled: "false"
 # Delegate Cilium tasks that needs to communicate with the Kubernetes API
@@ -138,6 +151,62 @@ cilium_helm_show_commands: true
 
 # Delegate tasks to create CoreDNS K8s resources to this host.
 coredns_delegate_to: "test-assets"
+
+# CoreDNS settings
+helm_version: "3.19.5"
+coredns_kubeconfig: "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
+coredns_service_ip: "10.32.0.254"
+coredns_cluster_domain: "cluster.local"
+coredns_upstreams:
+  - "1.1.1.1"
+  - "9.9.9.9"
+
+# Preserve the previous Corefile and scheduling settings. The servers list
+# replaces the role's defaults, including its plugin order.
+coredns_values:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 70Mi
+    limits:
+      cpu: 100m
+      memory: 170Mi
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      effect: NoSchedule
+    - key: CriticalAddonsOnly
+      operator: Exists
+  servers:
+    - zones:
+        - zone: "."
+          use_tcp: true
+      port: 53
+      plugins:
+        - name: errors
+        - name: health
+          configBlock: "lameduck 5s"
+        - name: kubernetes
+          parameters: "{{ coredns_cluster_domain }} in-addr.arpa ip6.arpa"
+          configBlock: |-
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+        - name: prometheus
+          parameters: ":9153"
+        - name: forward
+          parameters: ". {{ coredns_upstreams | join(' ') }}"
+        - name: cache
+          parameters: "30"
+        - name: loop
+        - name: reload
+        - name: loadbalance
+        - name: ready
+
+# Pin the networking fixture independently of the worker role.
+mol__smoke_namespace: "molecule-smoke"
+mol__smoke_app_name: "nginx-smoke"
+mol__smoke_node_port: 30079
+mol__dedicated_workers: "{{ groups['k8s_worker'] | difference(groups['k8s_controller']) | sort }}"
 
 # Common name for "etcd" certificate authority certificates.
 ca_etcd_csr_cn: "etcd"

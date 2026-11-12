@@ -4,20 +4,23 @@ This Ansible role is used in [Kubernetes the not so hard way with Ansible - Work
 
 ## Versions
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `32.0.0+1.35.5` means this is release `32.0.0` of this role and it's meant to be used with Kubernetes version `1.35.5` (but should work with any K8s 1.35.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `33.0.0+1.36.6` means this is release `33.0.0` of this role and it's meant to be used with Kubernetes version `1.36.6` (but should work with any K8s 1.36.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
 
 ## Requirements
 
 This playbook expects that you already have rolled out the Kubernetes controller components (see [kubernetes-controller](https://github.com/githubixx/ansible-role-kubernetes-controller) and [Kubernetes the not so hard way with Ansible - Control plane](https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-control-plane/).
 
-You also need [containerd](https://github.com/githubixx/ansible-role-containerd), [CNI plugins](https://github.com/githubixx/ansible-role-cni) and [runc](https://github.com/githubixx/ansible-role-runc) installed. To enable Kubernetes `Pods` to communicate between different hosts it makes sense to install [Cilium](https://galaxy.ansible.com/githubixx/cilium_kubernetes) later once the worker nodes are running e.g. Of course `Calico`, `WeaveNet`, `kube-router` or [flannel](https://galaxy.ansible.com/githubixx/flanneld) or other Kubernetes network solutions are valid options.
+You also need [containerd](https://github.com/githubixx/ansible-role-containerd) **2.x**, [CNI plugins](https://github.com/githubixx/ansible-role-cni) and [runc](https://github.com/githubixx/ansible-role-runc) installed. This role checks the installed containerd version before provisioning workers; containerd 1.x is no longer supported by this role. To enable Kubernetes `Pods` to communicate between different hosts it makes sense to install [Cilium](https://galaxy.ansible.com/githubixx/cilium_kubernetes) later once the worker nodes are running e.g. Of course `Calico`, `WeaveNet`, `kube-router` or other Kubernetes network solutions are valid options.
 
-For Kubernetes `1.35.x` worker hosts should use cgroup v2. This role configures kubelet for the `systemd` cgroup driver, but it does not change the host cgroup mode.
+For Kubernetes `1.36.x` worker hosts should use cgroup v2. This role retains `cgroupDriver: "systemd"` in the kubelet configuration, but it does not change the host cgroup mode. Kubernetes 1.36 queries containerd 2.x through the CRI `RuntimeConfig` API and uses the reported cgroup driver instead of this kubelet setting. Configure containerd's runc runtime with `SystemdCgroup = true`; leaving the kubelet setting in place is harmless but does not override the runtime. Requiring containerd 2.x is this role's support policy, not an upstream Kubernetes 1.36 minimum.
+
+The default kube-proxy backend is now `nftables`. It requires Linux kernel **5.13 or newer** and **nft 1.0.0 or newer**. The role installs nftables tooling and checks these requirements when nftables mode is selected. Verify that your CNI and host firewall support this backend.
 
 ## Supported OS
 
 - Ubuntu 22.04 (Jammy Jellyfish)
 - Ubuntu 24.04 (Noble Numbat) (recommended)
+- Ubuntu 26.04 (Resolute Raccoon)
 
 ## Changelog
 
@@ -28,6 +31,32 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 **IMPORTANT** Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
 
 **Recent changes:**
+
+## 33.0.0+1.36.6
+
+- **BREAKING**
+  - require containerd 2.x before provisioning workers; containerd 1.x is no longer supported by this role
+  - default kube-proxy to `nftables` instead of deprecated `ipvs`, as announced in the previous release
+  - nftables mode requires Linux kernel 5.13+ and nft 1.0.0+; NodePorts default to primary node addresses and require explicit host firewall allowances
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.36.6`
+  - add Ubuntu 26.04 support and install nftables tooling
+  - preserve the existing masquerading policy, explicitly select primary node addresses for NodePorts, and use upstream nftables synchronization intervals (`minSyncPeriod: 1s`, `syncPeriod: 30s`)
+  - restart kubelet and kube-proxy when their configuration files change
+
+- **MOLECULE**
+  - cover Ubuntu 26.04 on a controller and a dedicated worker; align controller and assets-host kubectl with Kubernetes 1.36.6
+  - include idempotence and verify in the test sequence; install networking, DNS, and persistent smoke fixtures during converge
+  - disable Cilium kube-proxy replacement and socket load balancing so service checks exercise kube-proxy
+  - install CoreDNS through `githubixx.coredns`, preserving the DNS Service address and Corefile; prepare Helm 3 and Helm-diff on the assets host
+  - verify runtime dependencies, worker versions, health endpoints, nftables rules, fine-grained kubelet RBAC, cross-node service traffic, DNS, NodePorts, and exec streaming without creating or deleting workloads
+
+- **UPGRADE NOTES**
+  - upgrade the control plane first; controller role `31.0.0+1.36.6` includes the fine-grained kubelet authorization permissions that became stable in Kubernetes 1.36
+  - upgrade containerd to 2.x and configure its runc runtime with `SystemdCgroup = true`; keep cgroup v2 and the systemd cgroup driver
+  - preserve kubelet TLS and webhook authorization for direct WebSocket streaming; regenerate embedded kubeconfig certificates when rotating their CA
+  - custom `k8s_worker_kubeproxy_conf_yaml` values are not rewritten; see [CHANGELOG.md](CHANGELOG.md) for migration and an explicit IPVS override
 
 ## 32.0.0+1.35.5
 
@@ -53,62 +82,6 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
   - use own [githubixx Vagrant boxes](https://portal.cloud.hashicorp.com/vagrant/discover/githubixx)
   - add more checks in `verify.yml`
 
-## 30.0.0+1.33.6
-
-- **UPDATE**
-  - update `k8s_ctl_release` to `1.33.6`
-
-## 29.1.0+1.32.9
-
-- **UPDATE**
-  - update `k8s_ctl_release` to `1.32.9`
-
-- **OTHER CHANGES**
-  - `defaults/main.yml`: `k8s_worker_api_endpoint_host` - simplify the complex default variables for endpoint hosts to avoid nested template construction
-
-- **MOLECULE**
-  - install `python3-kubernetes` package instead `kubernetes` Pip in `prepare.yml`
-
-## 29.0.0+1.32.8
-
-- **BREAKING**
-  - Removed Ubuntu 20.04 because reached end of life
-
-- **UPDATE**
-  - update `k8s_worker_release` to `1.32.8`
-  - `kubelet.service.j2`: Update `kubelet` systemd service file. Utilize the systemd watchdog capability to restart the kubelet when the kubelet health check fails, and limit the maximum number of restarts within a given time period. This can enhance the reliability of the kubelet to some extent (see [integrate kubelet with the systemd watchdog](https://github.com/kubernetes/kubernetes/pull/127566)):
-    - Changed: `Restart=on-failure` -> `Restart=always`
-    - Changed: `RestartSec=5` -> `RestartSec=10`
-    - Added: `WatchdogSec=30s`
-
-- **MOLECULE**
-  - Removed Ubuntu 20.04 because reached end of life
-  - Fix `ansible-lint` issues
-
-## 28.0.1+1.31.11
-
-- **UPDATE**
-  - update `k8s_worker_release` to `1.31.11`
-
-## 28.0.0+1.31.5
-
-- **UPDATE**
-  - update `k8s_worker_release` to `1.31.5`
-
-## 27.0.1+1.30.9
-
-- **UPDATE**
-  - update `k8s_worker_release` to `1.30.9`
-
-## 27.0.0+1.30.5
-
-- **UPDATE**
-  - update `k8s_worker_release` to `1.30.5`
-
-- **OTHER CHANGES**
-  - support Ubuntu 24.04
-  - update `.yamllint`
-
 ## Installation
 
 - Directly download from Github (Change into Ansible roles directory before cloning. You can figure out the role path by using `ansible-config dump | grep DEFAULT_ROLES_PATH` command):
@@ -125,7 +98,7 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 roles:
   - name: githubixx.kubernetes_worker
     src: https://github.com/githubixx/ansible-role-kubernetes-worker.git
-    version: 32.0.0+1.35.5
+    version: 33.0.0+1.36.6
 ```
 
 ## Role Variables
@@ -153,7 +126,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.35.5"
+k8s_worker_release: "1.36.6"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is
@@ -192,7 +165,7 @@ k8s_ca_conf_directory: "{{ '~/k8s/certs' | expanduser }}"
 # variable of https://github.com/githubixx/ansible-role-kubernetes-ca
 # role). If it's not specified you'll get certificate errors in the
 # logs of the services mentioned above.
-k8s_worker_api_endpoint_host: "{% set controller_host = groups['k8s_controller'][0] %}{{ hostvars[controller_host]['ansible_facts'][hostvars[controller_host]['k8s_interface']]['ipv4']['address'] }}"
+k8s_worker_api_endpoint_host: "{{ hostvars[groups['k8s_controller'] | first]['ansible_facts'][hostvars[groups['k8s_controller'] | first]['k8s_interface']]['ipv4']['address'] }}"
 
 # As above just for the port. It specifies on which port the
 # Kubernetes API servers are listening. Again if there is a loadbalancer
@@ -210,6 +183,7 @@ k8s_worker_os_packages:
   - ipset
   - conntrack
   - iptables
+  - nftables
   - iptstate
   - netstat-nat
   - socat
@@ -282,14 +256,12 @@ k8s_worker_kubeproxy_conf_yaml: |
   clientConnection:
     kubeconfig: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeconfig"
   healthzBindAddress: {{ hostvars[inventory_hostname]['ansible_facts'][k8s_interface]['ipv4']['address'] }}:10256
-  # Kubernetes v1.35 deprecates IPVS mode, but this role keeps it as the
-  # default for backwards compatibility for now until next major release.
-  mode: "ipvs"
-  ipvs:
-    minSyncPeriod: 0s
-    scheduler: ""
-    syncPeriod: 2s
-  iptables:
+  mode: "nftables"
+  nodePortAddresses:
+    - primary
+  nftables:
+    minSyncPeriod: 1s
+    syncPeriod: 30s
     masqueradeAll: true
   clusterCIDR: "10.200.0.0/16"
 ```
@@ -313,25 +285,36 @@ k8s_worker_kubeproxy_conf_yaml: |
 
 This role has a small test setup that is created using [Molecule](https://github.com/ansible-community/molecule), libvirt (vagrant-libvirt) and QEMU/KVM. Please see my blog post [Testing Ansible roles with Molecule, libvirt (vagrant-libvirt) and QEMU/KVM](https://www.tauceti.blog/posts/testing-ansible-roles-with-molecule-libvirt-vagrant-qemu-kvm/) how to setup. The Molecule test configuration is in [molecule/default](https://github.com/githubixx/ansible-role-kubernetes-worker/tree/master/molecule/default).
 
-Afterwards Molecule can be executed. This will setup a few virtual machines (VM) with supported Ubuntu OS and installs a Kubernetes cluster:
+The scenario creates ten VMs covering Ubuntu 22.04, 24.04, and 26.04. A normal converge installs workers, Cilium, CoreDNS, and persistent smoke-test workloads:
 
 ```bash
 molecule converge
 ```
 
-At this time the cluster isn't fully functional as a network plugin is missing e.g. So Pod to Pod communication between two different nodes isn't possible yet. To fix this the following command can be used to install [Cilium](https://github.com/githubixx/ansible-role-cilium-kubernetes) for all Kubernetes networking needs and [CoreDNS](https://github.com/githubixx/ansible-kubernetes-playbooks/tree/master/coredns) for Kubernetes DNS stuff:
+For the complete automated sequence (`prepare`, `converge`, `idempotence`, `verify`, preceded by VM creation), run:
 
 ```bash
+molecule test
+```
+
+The two-stage workflow is still available. The first command deliberately leaves networking uninstalled; the second installs Cilium, CoreDNS, and smoke-test fixtures without reinstalling workers:
+
+```bash
+molecule converge -- --extra-vars k8s_worker_setup_networking=skip
 molecule converge -- --extra-vars k8s_worker_setup_networking=install
 ```
 
-After this you basically have a fully functional Kubernetes cluster.
-
-A small verification step is also included:
+Verification requires networking and fixtures to be present; missing dependencies fail rather than silently skipping smoke checks. It checks service health, exact worker versions, fine-grained kubelet RBAC, nftables rules, NodePorts, cross-node ClusterIP traffic, DNS, and kubelet exec streaming. Cilium's kube-proxy replacement and socket load balancing are disabled so service checks exercise kube-proxy. Verification does not create or delete cluster resources:
 
 ```bash
 molecule verify
 ```
+
+Cilium is installed through `githubixx.cilium_kubernetes`, using the scenario's custom Helm values template. Its installation tasks create and remove temporary values files on each run, which currently causes the full scenario's idempotence check to report changes.
+
+CoreDNS is installed through `githubixx.coredns`. Preparation installs Helm 3 and the Helm-diff plugin for `vagrant` on the assets host. The scenario preserves the `kube-dns` Service at `10.32.0.254` with UDP/TCP port 53, two replicas, resource requests and memory limit, tolerations, and the previous Corefile (including upstreams `1.1.1.1` and `9.9.9.9`). The role supplies its chart's current image, labels/annotations, readiness probe, disruption budget, and safer rollout settings.
+
+On `test-assets`, `vagrant` can use `/home/vagrant/.kube/config`, which links to `/home/vagrant/k8s/configs/admin.kubeconfig`.
 
 To clean up run
 

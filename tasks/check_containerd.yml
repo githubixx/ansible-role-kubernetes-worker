@@ -1,0 +1,14 @@
+---
+- name: Read installed containerd version
+  ansible.builtin.command: containerd --version
+  register: kubernetes_worker__containerd_version
+  changed_when: false
+  check_mode: false
+
+- name: Require containerd 2.x
+  ansible.builtin.assert:
+    that:
+      - kubernetes_worker__containerd_version.stdout is match('^containerd\s+\S+\s+v?2\.[0-9]+\.[0-9]+(?:[-+]\S+)?(?:\s|$)')
+    fail_msg: >-
+      This role requires containerd 2.x; found {{ kubernetes_worker__containerd_version.stdout }}.
+      Upgrade containerd before applying the worker role.

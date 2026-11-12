@@ -82,6 +82,7 @@
       vars:
         packages:
           - conntrack
+          - git
           - python3-pip
 
     - name: Install kubernetes Python package
@@ -92,6 +93,15 @@
     - name: Install Helm role
       ansible.builtin.include_role:
         name: gantsign.helm
+
+    - name: Install Helm diff plugin for the execution user
+      become: false
+      kubernetes.core.helm_plugin:
+        plugin_path: https://github.com/databus23/helm-diff
+        plugin_version: v3.14.0
+        state: present
+      vars:
+        ansible_become: false
 
 - name: Setup HAProxy
   hosts: haproxy
@@ -144,11 +154,25 @@
         owner: "vagrant"
         group: "vagrant"
 
-    - name: Copy admin.kubeconfig to vagrant home directory
-      ansible.builtin.copy:
+    - name: Link admin.kubeconfig in the vagrant home directory
+      ansible.builtin.file:
         src: "{{ k8s_admin_conf_dir }}/admin.kubeconfig"
         dest: "{{ k8s_controller__vagrant_kube_directory }}/config"
-        mode: "0400"
-        remote_src: true
+        state: link
+        follow: false
         owner: "vagrant"
         group: "vagrant"
+
+    - name: Check API readiness before worker converge
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - "--kubeconfig={{ k8s_admin_conf_dir }}/admin.kubeconfig"
+          - get
+          - --raw=/readyz
+      register: mol__api_ready
+      changed_when: false
+      retries: 12
+      delay: 5
+      until: mol__api_ready.rc == 0 and mol__api_ready.stdout | trim == 'ok'
+      failed_when: mol__api_ready.rc != 0 or mol__api_ready.stdout | trim != 'ok'

@@ -1,4 +1,18 @@
 ---
+- name: Check required containerd version
+  ansible.builtin.import_tasks: check_containerd.yml
+  tags:
+    - k8s-worker
+
+- name: Check kernel support for nftables proxy mode
+  when: (k8s_worker_kubeproxy_conf_yaml | from_yaml).get('mode', '') == 'nftables'
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['kernel'] is version('5.13', '>=')
+    fail_msg: "kube-proxy nftables mode requires Linux kernel 5.13 or newer; found {{ ansible_facts['kernel'] }}."
+  tags:
+    - k8s-worker
+
 - name: Remove swapfile from /etc/fstab
   ansible.posix.mount:
     name: swap
@@ -63,6 +77,23 @@
     loop_var: "package"
   tags:
     - k8s-worker
+
+- name: Check installed nftables tooling
+  when: (k8s_worker_kubeproxy_conf_yaml | from_yaml).get('mode', '') == 'nftables'
+  tags:
+    - k8s-worker
+  block:
+    - name: Read nftables version
+      ansible.builtin.command: nft --version
+      register: kubernetes_worker__nft_version
+      changed_when: false
+
+    - name: Require compatible nftables tooling
+      ansible.builtin.assert:
+        that:
+          - kubernetes_worker__nft_version.stdout | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') is not none
+          - kubernetes_worker__nft_version.stdout | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') is version('1.0.0', '>=')
+        fail_msg: "kube-proxy nftables mode requires nft 1.0.0 or newer: {{ kubernetes_worker__nft_version.stdout }}"
 
 - name: Copy worker certificates (part 1)
   ansible.builtin.copy:
@@ -132,6 +163,8 @@
     content: "{{ k8s_worker_kubelet_conf_yaml }}"
     dest: "{{ k8s_worker_kubelet_conf_dir }}/kubelet-config.yaml"
     mode: "0600"
+  notify:
+    - Restart kubelet
   tags:
     - k8s-worker
     - kubelet-config-yaml
@@ -141,6 +174,8 @@
     content: "{{ k8s_worker_kubeproxy_conf_yaml }}"
     dest: "{{ k8s_worker_kubeproxy_conf_dir }}/kubeproxy-config.yaml"
     mode: "0600"
+  notify:
+    - Restart kube-proxy
   tags:
     - k8s-worker
     - kubeproxy-config-yaml

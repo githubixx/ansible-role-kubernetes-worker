@@ -1,0 +1,36 @@
+---
+- name: Check required containerd version before and after converge
+  ansible.builtin.include_tasks:
+    file: "{{ playbook_dir }}/../../tasks/check_containerd.yml"
+
+- name: Gather runtime service facts
+  ansible.builtin.service_facts:
+
+- name: Assert containerd is running
+  ansible.builtin.assert:
+    that:
+      - "'containerd.service' in ansible_facts.services"
+      - ansible_facts.services['containerd.service'].state == 'running'
+    fail_msg: "containerd must be running on {{ inventory_hostname }} before and after worker converge."
+
+- name: Check the containerd CRI socket
+  ansible.builtin.wait_for:
+    path: /run/containerd/containerd.sock
+    timeout: 30
+
+- name: Check cgroup v2 availability
+  ansible.builtin.stat:
+    path: /sys/fs/cgroup/cgroup.controllers
+  register: mol__cgroup_controllers
+
+- name: Require cgroup v2 on worker hosts
+  ansible.builtin.assert:
+    that:
+      - mol__cgroup_controllers.stat.exists
+    fail_msg: "Kubernetes 1.36 workers require cgroup v2 in this scenario."
+
+- name: Check worker API endpoint connectivity
+  ansible.builtin.wait_for:
+    host: "{{ k8s_worker_api_endpoint_host | default(hostvars[groups['k8s_controller'] | first].ansible_facts[k8s_interface].ipv4.address) }}"
+    port: "{{ k8s_worker_api_endpoint_port | default(6443) }}"
+    timeout: 60
