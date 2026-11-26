@@ -4,7 +4,7 @@ This Ansible role is used in [Kubernetes the not so hard way with Ansible - Work
 
 ## Versions
 
-I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `33.0.0+1.36.6` means this is release `33.0.0` of this role and it's meant to be used with Kubernetes version `1.36.6` (but should work with any K8s 1.36.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
+I tag every release and try to stay with [semantic versioning](http://semver.org). If you want to use the role I recommend to checkout the latest tag. The master branch is basically development while the tags mark stable releases. But in general I try to keep master in good shape too. A tag `33.0.1+1.36.7` means this is release `33.0.1` of this role and it's meant to be used with Kubernetes version `1.36.7` (but should work with any K8s 1.36.x release of course). If the role itself changes `X.Y.Z` before `+` will increase. If the Kubernetes version changes `X.Y.Z` after `+` will increase too. This allows to tag bugfixes and new major versions of the role while it's still developed for a specific Kubernetes release. That's especially useful for Kubernetes major releases with breaking changes.
 
 ## Requirements
 
@@ -31,6 +31,14 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 **IMPORTANT** Version `24.0.0+1.27.8` had a lot of potential breaking changes. So if you upgrade from a version < `24.0.0+1.27.8` please read the CHANGELOG of that version too!
 
 **Recent changes:**
+
+## 33.0.1+1.36.7
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.36.7`
+
+- **MOLECULE**
+  - align `k8s_ctl_release` and `kubectl_version` with `1.36.7`
 
 ## 33.0.0+1.36.6
 
@@ -98,7 +106,7 @@ See full [CHANGELOG.md](https://github.com/githubixx/ansible-role-kubernetes-wor
 roles:
   - name: githubixx.kubernetes_worker
     src: https://github.com/githubixx/ansible-role-kubernetes-worker.git
-    version: 33.0.0+1.36.6
+    version: 33.0.1+1.36.7
 ```
 
 ## Role Variables
@@ -126,7 +134,7 @@ k8s_worker_pki_dir: "{{ k8s_worker_conf_dir }}/pki"
 k8s_worker_bin_dir: "/usr/local/bin"
 
 # K8s release
-k8s_worker_release: "1.36.6"
+k8s_worker_release: "1.36.7"
 
 # The interface on which the Kubernetes services should listen on. As all cluster
 # communication should use a VPN interface the interface name is

@@ -77,7 +77,7 @@ k8s_ca_certificate_group: "vagrant"
 k8s_interface: "wg0"
 
 # Keep test dependencies aligned with the worker release.
-k8s_ctl_release: "1.36.6"
+k8s_ctl_release: "1.36.7"
 
 # Interface where the etcd daemons listening on.
 k8s_ctl_etcd_interface: "{{ etcd_interface }}"
@@ -96,7 +96,7 @@ k8s_ctl_ca_conf_directory: "{{ k8s_ca_conf_directory }}"
 k8s_config_cluster_name: "k8s"
 
 # Keep test dependencies aligned with the worker release.
-kubectl_version: "1.36.6"
+kubectl_version: "1.36.7"
 
 # Directory where "admin.kubeconfig" (the credentials file) for the "admin"
 # user is stored
