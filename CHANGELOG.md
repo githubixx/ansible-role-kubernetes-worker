@@ -1,5 +1,13 @@
 # Changelog
 
+## 33.0.1+1.36.7
+
+- **UPDATE**
+  - update `k8s_worker_release` to `1.36.7`
+
+- **MOLECULE**
+  - align `k8s_ctl_release` and `kubectl_version` with `1.36.7`
+
 ## 33.0.0+1.36.6
 
 - **BREAKING**
